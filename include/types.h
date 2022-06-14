@@ -16,9 +16,9 @@ typedef struct container
 
 typedef struct tree 
 {
-    void *data;                 // data stored in the tree node
-    tree *left;                 // a pointer that points to the LEFT subtree of the node
-    tree *right;                // a pointer that points to the RIGHT subtree of the node
+    void *data;    // data stored in the tree node
+    tree *left;    // a pointer that points to the LEFT subtree of the node
+    tree *right;   // a pointer that points to the RIGHT subtree of the node
 } tree;
 
 #endif // __TYPES_H__
