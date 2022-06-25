@@ -23,7 +23,7 @@ void tree_insert(tree *t, void *obj)
     {
         result = t->compare_fn(t->data, obj);
 
-        if(result == -1 || result || == 0)
+        if(result == -1 || result == 0)
         {
             tmp = t;
             t1 = tmp;
@@ -42,7 +42,7 @@ void tree_insert(tree *t, void *obj)
         }
     }
 
-    if(result == -1 || result || == 0)
+    if(result == -1 || result == 0)
     {
         t1->left = (tree *)malloc(sizeof(tree));
         t1->left->compare_fn = t2->compare_fn;
