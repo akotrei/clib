@@ -27,4 +27,4 @@ void tree_insert(tree *t, void *obj);
 **/
 void tree_print(tree *t, void (*print_fn)(void *obj));
 
-#endif // __TREE_H__
+#endif /* __TREE_H__ */
