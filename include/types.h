@@ -14,11 +14,13 @@ typedef struct container
 
 } container;
 
-typedef struct tree 
+typedef struct tree
 {
-    void *data;    // data stored in the tree node
-    tree *left;    // a pointer that points to the LEFT subtree of the node
-    tree *right;   // a pointer that points to the RIGHT subtree of the node
+    int (*compare_fn)(void *obj1, void *obj2);    // function compares two objects and return 0 if objects equals,
+                                                  // 1 if obj1 greater obj2, -1 if obj1 less obj2
+    void *data;                                   // data stored in the tree node
+    struct tree *left;                            // a pointer that points to the LEFT subtree of the node
+    struct tree *right;                           // a pointer that points to the RIGHT subtree of the node
 } tree;
 
 #endif // __TYPES_H__
