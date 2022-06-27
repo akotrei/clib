@@ -43,20 +43,10 @@ void tree_insert(tree *t, void *obj)
     }
 
     if(result == -1 || result == 0)
-    {
-        t1->left = (tree *)malloc(sizeof(tree));
-        t1->left->compare_fn = t2->compare_fn;
-        t1->left->data = obj;
-        t1->left->left = t1->left->right = NULL;
-    }
+        t1->left = tree_new(obj, t2->compare_fn);
 
     if(result == 1 || result == 0)
-    {
-        t1->right = (tree *)malloc(sizeof(tree));
-        t1->right->compare_fn = t2->compare_fn;
-        t1->right->data = obj;
-        t1->right->left = t1->right->right = NULL;
-    }
+        t1->right = tree_new(obj, t2->compare_fn);
 }
 
 void tree_print(tree *t, void (*print_fn)(void *obj))
