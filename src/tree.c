@@ -66,21 +66,22 @@ typedef struct tree
     int elem_size;
     int (*cmp_fn)(void *o1, void *o2);
     void (*dealloc_fn)(void *elem);
-    knot_t* knot; 
+    knot_t *knot;
 };
-
 
 typedef struct knot_t
 {
-    void* data;
-    knot_t* l;
-    knot_t* r;
+    void *data;
+    knot_t *l;
+    knot_t *r;
 };
 
-static knot_t* knot_create(void* data);
-static void knot_delete(knot_t* knot, void (*dealloc_fn)(void *data));
-static void knot_add_l(knot_t* knot, void *elem);
-static void knot_add_r(knot_t* knot, void *elem);
+static knot_t *knot_create(void *data);
+static void knot_delete(knot_t *knot, void (*dealloc_fn)(void *data));
+static void knot_add_l(knot_t *knot, void *elem);
+static void knot_add_r(knot_t *knot, void *elem);
+
+static knot_t *knot_traverse(knot_t *knot, void *elem, int (*cmp_fn)(void *, void *));
 
 tree *tree_create(int elem_size, int (*cmp_fn)(void *, void *), void (*dealloc_fn)(void *))
 {
@@ -92,7 +93,28 @@ tree *tree_create(int elem_size, int (*cmp_fn)(void *, void *), void (*dealloc_f
     return t;
 }
 
-void tree_add_elem(void *elem)
+void tree_add_elem(tree *t, void *elem)
 {
-    
+    knot_t *knot = t->knot;
+    knot_t *knot_to_add;
+    knot_to_add = knot_traverse(knot, elem, t->compare_fn);
+}
+
+knot_t *knot_traverse(knot_t *knot, void *elem, int (*cmp_fn)(void *, void *))
+{
+    knot_t* knot_traverse = knot;
+    int cmp_result;
+    while (knot_traverse)
+    {
+        cmp_result = cmp_fn(knot->data, elem);
+        if (cmp_result <=0 )
+        {
+            knot_traverse = knot_traverse->l;
+        }
+        else
+        {
+            knot_traverse = knot_traverse->r;
+        }
+    }
+    return knot_traverse;
 }
