@@ -79,3 +79,5 @@ typedef struct knot_t
 
 static knot_t* knot_create(void* data);
 static void knot_delete(knot_t* knot, void (*dealloc_fn)(void *data));
+static void knot_add_l(knot_t* knot, void *elem);
+static void knot_add_r(knot_t* knot, void *elem);
