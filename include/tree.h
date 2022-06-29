@@ -32,8 +32,8 @@ typedef struct tree tree;
 
 tree *tree_create(int elem_size, int (*cmp_fn)(void *, void *), void (*dealloc_fn)(void *));
 void tree_delete(tree *t);
-void tree_add_elem(void *elem);
-void *tree_find_elem(void *elem);
-void *tree_delete_elem(void *elem);
+void tree_add_elem(tree *t, void *elem);
+void *tree_find_elem(tree *t, void *elem);
+void *tree_delete_elem(tree *t, void *elem);
 
 #endif /* __TREE_H__ */

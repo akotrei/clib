@@ -81,3 +81,18 @@ static knot_t* knot_create(void* data);
 static void knot_delete(knot_t* knot, void (*dealloc_fn)(void *data));
 static void knot_add_l(knot_t* knot, void *elem);
 static void knot_add_r(knot_t* knot, void *elem);
+
+tree *tree_create(int elem_size, int (*cmp_fn)(void *, void *), void (*dealloc_fn)(void *))
+{
+    tree *t = (tree *)malloc(sizeof(tree));
+    t->elem_size = elem_size;
+    t->cmp_fn = cmp_fn;
+    t->dealloc_fn = dealloc_fn;
+    t->knot = NULL;
+    return t;
+}
+
+void tree_add_elem(void *elem)
+{
+    
+}
