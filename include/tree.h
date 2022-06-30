@@ -3,37 +3,22 @@
 
 #include "types.h"
 
-/**
- * create new binary tree
- * function return pointer to created binary tree
- * @obj - pointer to a user object that doesn't have a specific data type
- * @compare_fn - pointer to a function that will later compare objects when
- * added, and will return 1 if @obj1 > @obj2, -1 if @obj1 < @obj2, 0 if @obj1 = @obj2
- **/
-tree *tree_new(void *obj, int (*compare_fn)(void *obj1, void *obj2));
+tree *tree_new(int elem_size, void (*dealloc_fn)(void *), int (*compare_fn)(void *, void *));
 
-/**
- * function addition an object to the binary tree
- * @t - pointer to the root of the tree
- * @obj - pointer to a user object which placed in new added node of the tree
- **/
-void tree_insert(tree *t, void *obj);
+void tree_add_elem(tree *t, void *elem);
 
-/**
- * print tree function to console
- * @t - pointer to the root of the tree
- * @print_fn - pointer to a function which will be called inside the print
- * function and what how it will print depends on the implementation of this function
- **/
-void tree_print(tree *t, void (*print_fn)(void *obj));
+void tree_print(knot *knot_t, void (*print_fn)(void *));
+/*void tree_insert(tree *t, void *obj);*/
+
+/*void tree_print(tree *t, void (*print_fn)(void *obj));*/
 
 /*=========================================================*/
-typedef struct tree tree;
+/*typedef struct tree tree;
 
 tree *tree_create(int elem_size, int (*cmp_fn)(void *, void *), void (*dealloc_fn)(void *));
 void tree_delete(tree *t);
 void tree_add_elem(tree *t, void *elem);
 void *tree_find_elem(tree *t, void *elem);
-void *tree_delete_elem(tree *t, void *elem);
+void *tree_delete_elem(tree *t, void *elem);*/
 
 #endif /* __TREE_H__ */

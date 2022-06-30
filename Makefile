@@ -29,6 +29,24 @@ container_so: container_obj
 ####################################
 
 ####################################
+# tree
+tree_c 	= $(src)/tree.c
+tree_o 	= tree.o
+tree_so 	= $(lib)/libtree.so
+
+tree_obj: $(tree_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-c $(tree_c) \
+	-o $(tree_o)
+
+tree_so: tree_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(tree_so) $(tree_o)
+	rm $(tree_o)
+####################################
+
+####################################
 # list
 list_c 	= $(src)/list.c
 list_o 	= list.o
@@ -61,7 +79,7 @@ test_obj: $(test_c)
 test_exe: test_obj
 	gcc -Wall -$(CXX_FLAG) \
 	-o $(test_exe) $(test_o) \
-	-L$(lib) -lcontainer
+	-L$(lib) -lcontainer -ltree
 	rm $(test_o)
 # ========================
 ####################################

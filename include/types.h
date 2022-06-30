@@ -14,13 +14,19 @@ typedef struct container
 
 } container;
 
+typedef struct knot 
+{
+    void *data;
+    struct knot *left;
+    struct knot *right;
+} knot;
+
 typedef struct tree
 {
-    int (*compare_fn)(void *obj1, void *obj2);    // function compares two objects and return 0 if objects equals,
-                                                  // 1 if obj1 greater obj2, -1 if obj1 less obj2
-    void *data;                                   // data stored in the tree node
-    struct tree *left;                            // a pointer that points to the LEFT subtree of the node
-    struct tree *right;                           // a pointer that points to the RIGHT subtree of the node
+    int elem_size;
+    int (*compare_fn)(void *, void *);
+    void (*dealloc_fn)(void *);
+    knot *knot_t;
 } tree;
 
 #endif // __TYPES_H__

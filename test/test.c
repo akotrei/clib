@@ -1,4 +1,5 @@
 #include "container.h"
+#include "tree.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,12 +15,56 @@ void test_container_2();
 void test_container_3();
 void free_obj(void *o);
 
+int test_tree_cmp_fn(void *obj1, void *obj2);
+void test_tree_1();
+void print(void *o);
+
 int main(int argc, char **args)
 {
-    test_container_1();
-    test_container_2();
-    test_container_3();
+//    test_container_1();
+//    test_container_2();
+//    test_container_3();
+    test_tree_1();
     return 0;
+}
+
+void print(void *o)
+{
+    int *a = (int *)o;
+    printf("%d\n", *a);
+}
+
+int test_tree_cmp_fn(void *obj1, void *obj2)
+{
+    int *tmp_obj1 = (int *)obj1;
+    int *tmp_obj2 = (int *)obj2;
+    if(*tmp_obj1 < *tmp_obj2)
+        return 1;
+    else 
+        return -1;
+    return 0;
+}
+
+void test_tree_1()
+{
+    int elem_size = sizeof(int);
+    int a = 5;
+    int b = 6;
+    int c = 3;
+    tree *t = tree_new(elem_size, NULL, test_tree_cmp_fn);
+    printf("address of root of the tree:         %p\n", t);
+    printf("element size in root tree:           %d\n", t->elem_size);
+    printf("address of function compare of tree: %p\n", t->compare_fn);
+    printf("%p\n", t->dealloc_fn);
+
+    tree_add_elem(t, &a);
+    print(t->knot_t->data);
+    tree_add_elem(t, &b);
+    print(t->knot_t->right->data);
+    tree_add_elem(t, &c);
+    print(t->knot_t->left->data);
+
+    tree_print(t->knot_t, print);
 }
 
 void test_container_3()
