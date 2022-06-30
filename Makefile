@@ -29,6 +29,24 @@ container_so: container_obj
 ####################################
 
 ####################################
+# list
+list_c 	= $(src)/list.c
+list_o 	= list.o
+list_so 	= $(lib)/liblist.so
+
+list_obj: $(list_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-c $(list_c) \
+	-o $(list_o)
+
+list_so: list_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(list_so) $(list_o)
+	rm $(list_o)
+####################################
+
+####################################
 # test
 test_c = $(CURRENT_DIR)/test/test.c
 test_o = $(CURRENT_DIR)/test/test.o
