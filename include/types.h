@@ -14,19 +14,4 @@ typedef struct container
 
 } container;
 
-typedef struct knot 
-{
-    void *data;
-    struct knot *left;
-    struct knot *right;
-} knot;
-
-typedef struct tree
-{
-    int elem_size;
-    int (*compare_fn)(void *, void *);
-    void (*dealloc_fn)(void *);
-    knot *knot_t;
-} tree;
-
 #endif // __TYPES_H__

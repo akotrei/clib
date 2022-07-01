@@ -17,6 +17,7 @@ void free_obj(void *o);
 
 int test_tree_cmp_fn(void *obj1, void *obj2);
 void test_tree_1();
+void test_tree_delete(void *);
 void print(void *o);
 
 int main(int argc, char **args)
@@ -45,26 +46,29 @@ int test_tree_cmp_fn(void *obj1, void *obj2)
     return 0;
 }
 
+void test_tree_delete(void *o)
+{
+    int *a = (int*)o;
+    free(a);
+}
+
 void test_tree_1()
 {
     int elem_size = sizeof(int);
-    int a = 5;
-    int b = 6;
-    int c = 3;
-    tree *t = tree_new(elem_size, NULL, test_tree_cmp_fn);
-    printf("address of root of the tree:         %p\n", t);
-    printf("element size in root tree:           %d\n", t->elem_size);
-    printf("address of function compare of tree: %p\n", t->compare_fn);
-    printf("%p\n", t->dealloc_fn);
+    int *a = (int *)malloc(sizeof(int));
+    int *b = (int *)malloc(sizeof(int));
+    int *c = (int *)malloc(sizeof(int));
+    *a = 5;
+    *b = 6;
+    *c = 3;
+    tree *t = tree_new(elem_size, test_tree_delete, test_tree_cmp_fn);
 
-    tree_add_elem(t, &a);
-    print(t->knot_t->data);
-    tree_add_elem(t, &b);
-    print(t->knot_t->right->data);
-    tree_add_elem(t, &c);
-    print(t->knot_t->left->data);
+    tree_add_elem(t, a);
+    tree_add_elem(t, b);
+    tree_add_elem(t, c);
 
-    tree_print(t->knot_t, print);
+    tree_print(t, print);
+    tree_delete(t);
 }
 
 void test_container_3()

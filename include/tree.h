@@ -3,11 +3,18 @@
 
 #include "types.h"
 
+typedef struct knot knot;
+
+typedef struct tree tree;
+
 tree *tree_new(int elem_size, void (*dealloc_fn)(void *), int (*compare_fn)(void *, void *));
 
 void tree_add_elem(tree *t, void *elem);
 
-void tree_print(knot *knot_t, void (*print_fn)(void *));
+void tree_print(tree *t, void (*print_fn)(void *));
+
+void tree_delete(tree *t);
+
 /*void tree_insert(tree *t, void *obj);*/
 
 /*void tree_print(tree *t, void (*print_fn)(void *obj));*/
