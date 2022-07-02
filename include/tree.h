@@ -13,6 +13,8 @@ void tree_add_elem(tree *t, void *elem);
 
 void tree_print(tree *t, void (*print_fn)(void *));
 
+void tree_knot_delete(tree *t);
+
 void tree_delete(tree *t);
 
 /*void tree_insert(tree *t, void *obj);*/

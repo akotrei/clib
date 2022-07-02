@@ -69,6 +69,7 @@ void test_tree_1()
 
     tree_print(t, print);
     tree_delete(t);
+    printf("%d\n", *a);
 }
 
 void test_container_3()

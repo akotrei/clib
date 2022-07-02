@@ -40,15 +40,21 @@ static void knot_print(knot *knot_t, void (*print_fn)(void *))
     knot_print(knot_t->right, print_fn);
 }
 
-static void knot_delete(knot **knot_t, void (*dealloc_fn)(void *))
+static void knot_delete_all(knot **knot_t, void (*dealloc_fn)(void *))
 {
     if(*knot_t == NULL)
         return; 
 
-    knot_delete(&(*knot_t)->left, dealloc_fn);
-    knot_delete(&(*knot_t)->right, dealloc_fn);
+    knot_delete_all(&(*knot_t)->left, dealloc_fn);
+    knot_delete_all(&(*knot_t)->right, dealloc_fn);
     dealloc_fn((*knot_t)->data);
     free(*knot_t);
+}
+
+static void knot_delete(knot *knot_t, void (*dealloc_fn)(void *data))
+{
+    dealloc_fn(knot_t->data);
+    free(knot_t);
 }
 
 tree *tree_new(int elem_size, void (*dealloc_fn)(void *), int (*compare_fn)(void *, void *))
@@ -89,7 +95,7 @@ void tree_print(tree *t, void (*print_fn)(void *))
 
 void tree_delete(tree *t)
 {
-    knot_delete(&t->knot_t, t->dealloc_fn);
+    knot_delete_all(&t->knot_t, t->dealloc_fn);
     free(t);
 }
 
