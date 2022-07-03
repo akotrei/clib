@@ -54,4 +54,11 @@ typedef struct imoveable
 
 } imoveable;
 
+typedef struct iallocator
+{
+    void* (*allocate)(void *self, int bytes);
+    void (*deallocate)(void *self, void *addr);
+    void *self;
+} iallocator;
+
 #endif /* __INTERFACE_H__ */

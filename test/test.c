@@ -61,7 +61,7 @@ void test_tree_1()
     *a = 5;
     *b = 6;
     *c = 3;
-    tree *t = tree_new(elem_size, test_tree_delete, test_tree_cmp_fn);
+    tree_t *t = tree_create(test_tree_cmp_fn, NULL, test_tree_delete, NULL);
 
     tree_add_elem(t, a);
     tree_add_elem(t, b);

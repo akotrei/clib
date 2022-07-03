@@ -1,206 +1,126 @@
 #include "tree.h"
+#include "allocator_std.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
-typedef struct knot
+typedef struct _knot_t knot_t;
+
+typedef struct _knot_t
 {
     void *data;
-    knot *left;
-    knot *right;
+    knot_t *left;
+    knot_t *right;
 };
 
-typedef struct tree
+typedef struct _tree_t
 {
-    int elem_size;
+    iallocator *il;
     int (*compare_fn)(void *, void *);
+    void* (*copy_fn)(void *);
     void (*dealloc_fn)(void *);
-    knot *knot_t;
-};
-
-static knot *knot_create(void *data)
-{
-    knot *knot_t = NULL;
-    knot_t = (knot *)malloc(sizeof(knot));
-    assert(knot_t != NULL && "memory for @knot_t hasn't been allocated");
-
-    knot_t->data = data;
-    knot_t->left = knot_t->right = NULL;
-    return knot_t;
-}
-
-static void knot_print(knot *knot_t, void (*print_fn)(void *))
-{
-    if(knot_t == NULL)
-        return;
-
-    knot_print(knot_t->left, print_fn);
-    print_fn(knot_t->data);
-    knot_print(knot_t->right, print_fn);
-}
-
-static void knot_delete_all(knot **knot_t, void (*dealloc_fn)(void *))
-{
-    if(*knot_t == NULL)
-        return; 
-
-    knot_delete_all(&(*knot_t)->left, dealloc_fn);
-    knot_delete_all(&(*knot_t)->right, dealloc_fn);
-    dealloc_fn((*knot_t)->data);
-    free(*knot_t);
-}
-
-static void knot_delete(knot *knot_t, void (*dealloc_fn)(void *data))
-{
-    dealloc_fn(knot_t->data);
-    free(knot_t);
-}
-
-tree *tree_new(int elem_size, void (*dealloc_fn)(void *), int (*compare_fn)(void *, void *))
-{
-    tree *t = NULL;
-    t = (tree *)malloc(sizeof(tree));
-    assert(t != NULL && "memory for @tree hasn't been allocated");
-
-    t->compare_fn = compare_fn;
-    t->dealloc_fn = dealloc_fn;
-    t->elem_size = elem_size;
-    t->knot_t = NULL;
-    return t;
-}
-
-void tree_add_elem(tree *t, void *elem)
-{
-    assert(t->compare_fn != NULL && "tree was created with @cpm_fn = NULL");
-
-    knot **knot_t = &t->knot_t;
-
-    while((*knot_t) != NULL)
-    {
-        if (t->compare_fn((*knot_t)->data, elem) <= 0)
-            knot_t = &(*knot_t)->left;
-        else
-            knot_t = &(*knot_t)->right;
-    }
-    void *tmp_data = malloc(t->elem_size);
-    memcpy(tmp_data, elem, t->elem_size);
-    (*knot_t) = knot_create(tmp_data);
-}
-
-void tree_print(tree *t, void (*print_fn)(void *))
-{
-    knot_print(t->knot_t, print_fn);
-}
-
-void tree_delete(tree *t)
-{
-    knot_delete_all(&t->knot_t, t->dealloc_fn);
-    free(t);
-}
-
-/*void tree_insert(tree *t, void *obj)
-{
-    tree *tmp = NULL, *t1 = t, *t2 = t;
-    int result = 0;
-
-    while (t != NULL)
-    {
-        result = t->compare_fn(t->data, obj);
-
-        if (result == -1 || result == 0)
-        {
-            tmp = t;
-            t1 = tmp;
-            t = t->left;
-            tmp->left = t;
-            tmp = t;
-        }
-
-        if (result == 1 || result == 0)
-        {
-            tmp = t;
-            t1 = tmp;
-            t = t->right;
-            tmp->right = t;
-            tmp = t;
-        }
-    }
-
-    if (result == -1 || result == 0)
-        t1->left = tree_new(obj, t2->compare_fn);
-
-    if (result == 1 || result == 0)
-        t1->right = tree_new(obj, t2->compare_fn);
-}
-
-void tree_print(tree *t, void (*print_fn)(void *obj))
-{
-    if (t == NULL)
-        return;
-
-    tree_print(t->right, print_fn);
-    print_fn(t->data);
-    tree_print(t->left, print_fn);
-}*/
-
-/*=========================================================*/
-/*typedef struct knot_t knot_t;
-
-typedef struct tree
-{
-    int elem_size;
-    int (*cmp_fn)(void *o1, void *o2);
-    void (*dealloc_fn)(void *elem);
     knot_t *knot;
 };
 
-typedef struct knot_t
-{
-    void *data;
-    knot_t *l;
-    knot_t *r;
-};
-
-static knot_t *knot_create(void *data);
+static knot_t *knot_create(void *data, iallocator *il);
+static void knot_print(knot_t *knot, void (*print_fn)(void *));
 static void knot_delete(knot_t *knot, void (*dealloc_fn)(void *data));
-static void knot_add_l(knot_t *knot, void *elem);
-static void knot_add_r(knot_t *knot, void *elem);
+static void knot_delete_all(knot_t **knot, void (*dealloc_fn)(void *));
+static void *pointer_to_object(void *o);
 
-static knot_t *knot_traverse(knot_t *knot, void *elem, int (*cmp_fn)(void *, void *));
-
-tree *tree_create(int elem_size, int (*cmp_fn)(void *, void *), void (*dealloc_fn)(void *))
+tree_t *tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void *o), void (*dealloc_fn)(void *o), iallocator *il)
 {
-    tree *t = (tree *)malloc(sizeof(tree));
-    t->elem_size = elem_size;
-    t->cmp_fn = cmp_fn;
+    iallocator *_il;
+
+    if(!il)
+        _il = allocator_std_get_allocator(allocator_std_new());
+    else 
+        _il = il;
+
+    tree_t *t = (tree_t *)_il->allocate(_il, sizeof(tree_t));
+    assert(t != NULL && "memory for @tree hasn't been allocated");
+
+    t->il = _il;
+    t->compare_fn = compare_fn;
     t->dealloc_fn = dealloc_fn;
+
+    if(copy_fn != NULL)
+        t->copy_fn = copy_fn;
+    else 
+        t->copy_fn = pointer_to_object;
+
     t->knot = NULL;
     return t;
 }
 
-void tree_add_elem(tree *t, void *elem)
+void tree_delete(tree_t *t)
 {
-    knot_t *knot = t->knot;
-    knot_t *knot_to_add;
-    knot_to_add = knot_traverse(knot, elem, t->compare_fn);
+    knot_delete_all(&t->knot, t->dealloc_fn);
+//    allocator_std_delete();
+    free(t);
 }
 
-knot_t *knot_traverse(knot_t *knot, void *elem, int (*cmp_fn)(void *, void *))
+void tree_add_elem(tree_t *t, void *elem)
 {
-    knot_t* knot_traverse = knot;
-    int cmp_result;
-    while (knot_traverse)
+    assert(t->compare_fn != NULL && "tree was created with @cpm_fn = NULL");
+    knot_t **knot = &t->knot;
+    while(*knot != NULL)
     {
-        cmp_result = cmp_fn(knot->data, elem);
-        if (cmp_result <=0 )
-        {
-            knot_traverse = knot_traverse->l;
-        }
+        if (t->compare_fn((*knot)->data, elem) <= 0)
+            knot = &(*knot)->left;
         else
-        {
-            knot_traverse = knot_traverse->r;
-        }
+            knot = &(*knot)->right;
     }
-    return knot_traverse;
-}*/
+    void *tmp_data = t->copy_fn(elem);
+    *knot = knot_create(tmp_data, t->il);
+}
+
+void tree_print(tree_t *t, void (*print_fn)(void *))
+{
+    knot_print(t->knot, print_fn);
+}
+
+static knot_t *knot_create(void *data, iallocator *il)
+{
+    knot_t *knot;
+    knot = (knot_t *)il->allocate(il, sizeof(knot_t));
+    assert(knot != NULL && "memory for @knot hasn't been allocated");
+
+    knot->data = data;
+    knot->left = knot->right = NULL;
+    return knot;
+}
+
+static void knot_print(knot_t *knot, void (*print_fn)(void *))
+{
+    if(knot == NULL)
+        return;
+
+    knot_print(knot->left, print_fn);
+    print_fn(knot->data);
+    knot_print(knot->right, print_fn);
+}
+
+static void knot_delete_all(knot_t **knot, void (*dealloc_fn)(void *))
+{
+    if(*knot == NULL)
+        return; 
+
+    knot_delete_all(&(*knot)->left, dealloc_fn);
+    knot_delete_all(&(*knot)->right, dealloc_fn);
+    dealloc_fn((*knot)->data);
+    free(*knot);
+}
+
+static void knot_delete(knot_t *knot, void (*dealloc_fn)(void *data))
+{
+    dealloc_fn(knot->data);
+    free(knot);
+}
+
+static void *pointer_to_object(void *o)
+{
+    return o;
+}

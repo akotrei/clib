@@ -47,6 +47,24 @@ tree_so: tree_obj
 ####################################
 
 ####################################
+# allocator_std
+allocator_std_c 	= $(src)/allocator_std.c
+allocator_std_o 	= allocator_std.o
+allocator_std_so 	= $(lib)/liballocator_std.so
+
+allocator_std_obj: $(allocator_std_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-c $(allocator_std_c) \
+	-o $(allocator_std_o)
+
+allocator_std_so: allocator_std_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(allocator_std_so) $(allocator_std_o)
+	rm $(allocator_std_o)
+####################################
+
+####################################
 # list
 list_c 	= $(src)/list.c
 list_o 	= list.o
@@ -79,7 +97,7 @@ test_obj: $(test_c)
 test_exe: test_obj
 	gcc -Wall -$(CXX_FLAG) \
 	-o $(test_exe) $(test_o) \
-	-L$(lib) -lcontainer -ltree
+	-L$(lib) -lcontainer -ltree -lallocator_std
 	rm $(test_o)
 # ========================
 ####################################
