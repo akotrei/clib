@@ -63,13 +63,15 @@ void test_tree_1()
     *c = 3;
     tree_t *t = tree_create(test_tree_cmp_fn, NULL, test_tree_delete, NULL);
 
-    tree_add_elem(t, a);
-    tree_add_elem(t, b);
-    tree_add_elem(t, c);
+    tree_add_object(t, a);
+    tree_add_object(t, b);
+    tree_add_object(t, c);
 
     tree_print(t, print);
-    tree_delete(t);
     printf("%d\n", *a);
+    tree_delete(&t);
+//    tree_print(t, print);
+    printf("%p\n", t->knot);
 }
 
 void test_container_3()

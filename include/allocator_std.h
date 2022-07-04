@@ -2,7 +2,6 @@
 #define __ALLOCATOR_H__
 
 #include "interface.h"
-#include <stdlib.h> 
 
 typedef struct allocator_std allocator_std;
 
