@@ -8,7 +8,7 @@
 
 typedef struct _knot_t knot_t;
 
-/*typedef struct _knot_t
+typedef struct _knot_t
 {
     void *data;
     knot_t *left;
@@ -23,12 +23,12 @@ typedef struct _tree_t
     void* (*copy_fn)(void *);
     void (*dealloc_fn)(void *);
     knot_t *knot;
-};*/
+};
 
 static knot_t *knot_create(void *data, iallocator *il);
 static void knot_print(knot_t *knot, void (*print_fn)(void *));
 static void knot_delete(knot_t *knot, void (*dealloc_fn)(void *data));
-static void knot_delete_all(knot_t **knot, void (*dealloc_fn)(void *));
+static void knot_delete_all(tree_t *t, knot_t **knot, void (*dealloc_fn)(void *o));
 static void *pointer_to_object(void *o);
 
 tree_t *tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void *o), void (*dealloc_fn)(void *o), iallocator *il)
@@ -63,12 +63,15 @@ tree_t *tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void
     return t;
 }
 
-void tree_delete(tree_t **t)
+void tree_delete(tree_t *t)
 {
-    knot_delete_all(&(*t)->knot, (*t)->dealloc_fn);
+    knot_delete_all(t, &t->knot, t->dealloc_fn);
     //if((*t)->allocator != NULL)
-     //   allocator_std_delete((allocator_std *)(*t)->allocator);
-    (*t)->il->deallocate(NULL, *t);
+    //   allocator_std_delete((allocator_std *)(*t)->allocator);
+    printf("%p\n", t->knot);
+    t->il->deallocate(NULL, t);
+    printf("%p\n", t->knot);
+    
 }
 
 void tree_add_object(tree_t *t, void *o)
@@ -112,15 +115,15 @@ static void knot_print(knot_t *knot, void (*print_fn)(void *o))
     knot_print(knot->right, print_fn);
 }
 
-static void knot_delete_all(knot_t **knot, void (*dealloc_fn)(void *o))
+static void knot_delete_all(tree_t *t, knot_t **knot, void (*dealloc_fn)(void *o))
 {
     if(*knot == NULL)
         return; 
 
-    knot_delete_all(&(*knot)->left, dealloc_fn);
-    knot_delete_all(&(*knot)->right, dealloc_fn);
+    knot_delete_all(t, &(*knot)->left, dealloc_fn);
+    knot_delete_all(t, &(*knot)->right, dealloc_fn);
     dealloc_fn((*knot)->data);
-    free(*knot);
+    t->il->deallocate(NULL, *knot);
 }
 
 static void knot_delete(knot_t *knot, void (*dealloc_fn)(void *data))
