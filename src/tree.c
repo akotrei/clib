@@ -4,25 +4,51 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
 
-typedef struct _knot_t knot_t;
+/*
+ * interface @itree declaration
+*/
+typedef struct itree itree;
 
-typedef struct _knot_t
+/*
+ * interface @itree definition
+*/
+typedef struct itree 
 {
-    void *data;
-    knot_t *left;
-    knot_t *right;
+    void*  (*get_data)(void *self);
+    itree* (*get_left)(void *self);
+    itree* (*get_right)(void *self);
+    void   (*add_object)(void *self, void *o);
+    void   (*del_object)(void *self, void *o);
+    void   (*fnd_object)(void *self, void *o);
 };
 
+/*
+ * knot type @knot_t declaration
+*/
+typedef struct _knot_t knot_t;
+
+/*
+ * definition @_knot_t type 
+*/
+typedef struct _knot_t
+{
+    void *data;       /*@data  - pointer to object which will store in this struct*/
+    knot_t *left;     /*@left  - pointer to left subtree*/
+    knot_t *right;    /*@right - pointer to right subtree*/
+};
+
+/*
+ * definition @_tree_t type of the tree
+*/
 typedef struct _tree_t
 {
-    iallocator *il;
-    void *allocator; 
-    int (*compare_fn)(void *, void *);
-    void* (*copy_fn)(void *);
-    void (*dealloc_fn)(void *);
-    knot_t *knot;
+    iallocator *il;                       /*@il         - */
+    void *allocator;                      /*@allocator  - */
+    int (*compare_fn)(void *, void *);    /*@compare_fn - */
+    void* (*copy_fn)(void *);             /*@copy_fn    - */
+    void (*dealloc_fn)(void *);           /*@dealloc_fn - */
+    knot_t *knot;                         /*@knot       - */
 };
 
 static knot_t *knot_create(void *data, iallocator *il);
@@ -66,11 +92,9 @@ tree_t *tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void
 void tree_delete(tree_t *t)
 {
     knot_delete_all(t, &t->knot, t->dealloc_fn);
-    //if((*t)->allocator != NULL)
-    //   allocator_std_delete((allocator_std *)(*t)->allocator);
-    printf("%p\n", t->knot);
+    if(t->allocator != NULL)
+       allocator_std_delete((allocator_std *)t->allocator);
     t->il->deallocate(NULL, t);
-    printf("%p\n", t->knot);
     
 }
 

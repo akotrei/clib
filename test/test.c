@@ -70,6 +70,7 @@ void test_tree_1()
     tree_print(t, print);
     printf("%d\n", *a);
     tree_delete(t);
+    free(a);
 //    tree_print(t, print);
 }
 
