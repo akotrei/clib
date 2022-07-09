@@ -54,24 +54,23 @@ void test_tree_delete(void *o)
 
 void test_tree_1()
 {
-    int elem_size = sizeof(int);
-    int *a = (int *)malloc(sizeof(int));
-    int *b = (int *)malloc(sizeof(int));
-    int *d = (int *)malloc(sizeof(int));
-    int *f = (int *)malloc(sizeof(int));
-    int *c = (int *)malloc(sizeof(int));
-    *a = 5;
-    *b = 6;
-    *c = 3;
-    *d = 2;
-    *f = 7;
-    tree_t *t = tree_create(test_tree_cmp_fn, NULL, test_tree_delete, NULL);
+    int a;// = (int *)malloc(sizeof(int));
+    int b;// = (int *)malloc(sizeof(int));
+    int d;// = (int *)malloc(sizeof(int));
+    int f;// = (int *)malloc(sizeof(int));
+    int c;// = (int *)malloc(sizeof(int));
+    a = 5;
+    b = 6;
+    c = 3;
+    d = 2;
+    f = 7;
+    tree_t *t = tree_create(test_tree_cmp_fn, NULL, NULL/*test_tree_delete*/, NULL);
 
-    tree_add_object(t, a);
-    tree_add_object(t, b);
-    tree_add_object(t, c);
-    tree_add_object(t, d);
-    tree_add_object(t, f);
+    tree_add_object(t, &a);
+    tree_add_object(t, &b);
+    tree_add_object(t, &c);
+    tree_add_object(t, &d);
+    tree_add_object(t, &f);
 
     tree_print(t, print);
 //    tree_fnd_object(t, f);

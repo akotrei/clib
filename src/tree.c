@@ -1,5 +1,6 @@
 #include "tree.h"
 #include "allocator_std.h"
+#include "itree.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -8,41 +9,44 @@
 
 /*
  * knot type @knot_t declaration
- */
+*/
 typedef struct _knot_t knot_t;
 
 /*
  * definition @_knot_t type 
- */
+*/
 typedef struct _knot_t
 {
-    void *data;        /*@data   - pointer to object which will store in this struct*/
-    knot_t *left;      /*@left   - pointer to left subtree*/
-    knot_t *right;     /*@right  - pointer to right subtree*/
-    knot_t *parent;    /*@parent - pointer to previous knot*/
+    void*      data;      /*@data   - pointer to object which will store in this struct*/
+    knot_t*    left;      /*@left   - pointer to left subtree*/
+    knot_t*    right;     /*@right  - pointer to right subtree*/
+    knot_t*    parent;    /*@parent - pointer to previous knot*/
 };
 
 /*
  * definition @_tree_t type of the tree
- */
+*/
 typedef struct _tree_t
 {
-    iallocator *il;                       /*@il         - */
-    void *allocator;                      /*@allocator  - */
-    int (*compare_fn)(void *, void *);    /*@compare_fn - */
-    void* (*copy_fn)(void *);             /*@copy_fn    - */
-    void (*dealloc_fn)(void *);           /*@dealloc_fn - */
-    knot_t *knot;                         /*@knot       - */
-    knot_t *root_knot;                    /*@root       - */
-    knot_t *curr_knot;                    /*@current    - */
+    iallocator*    il;                              /*@il         - pointer to interface of allocator which can allocate and deallocate memory use functions*/
+    void*          allocator;                       /*@allocator  - pointer to standard allocator which have functions @malloc and @free 
+                                                                    for allocate and deallocate memory*/
+    int            (*compare_fn)(void *, void *);   /*@compare_fn - pointer to function that can compare transferred her objects. 
+                                                                    This function should implement user, because he decided how objects should be compared. 
+                                                                    You can find out what result the function returns by looking at the comments in the file @tree.h*/
+    void*          (*copy_fn)(void *);              /*@copy_fn    - pointer to function that return pointer to copy of object which was transferred of user and
+                                                                    thereafter knot store copy of user object. More detailed description you can find in the file @tree.h*/
+    void           (*dealloc_fn)(void *);           /*@dealloc_fn - pointer to function that implement user for delete object*/
+    knot_t*        knot;                            /*@knot       - pointer to knot of the tree*/
+    itree          it;                              /*@it         - variable of interface of tree, with which possible use balance for the tree.
+                                                                    Details about the interface can be found in the file @itree.h*/
 };
 
 static knot_t *knot_create(void *data, iallocator *il, knot_t *parent);
 static void knot_print(knot_t *knot, void (*print_fn)(void *));
 static void knot_delete(knot_t *knot, void (*dealloc_fn)(void *data));
 static void knot_delete_all(tree_t *t, knot_t **knot, void (*dealloc_fn)(void *o));
-static void *pointer_to_object(void *o);
-static void reset(tree_t *t);
+static void *copy_fake(void *o);
 
 tree_t *tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void *o), void (*dealloc_fn)(void *o), iallocator *il)
 {
@@ -67,22 +71,24 @@ tree_t *tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void
     t->dealloc_fn = dealloc_fn;
     t->allocator = (void *)al;
 
+    t->it.self = t;
+
     if(copy_fn != NULL)
         t->copy_fn = copy_fn;
     else 
-        t->copy_fn = pointer_to_object;
+        t->copy_fn = copy_fake;
 
-    t->knot = t->root_knot = t->curr_knot = NULL;
+    t->knot = NULL;
     return t;
 }
 
 void tree_delete(tree_t *t)
 {
     knot_delete_all(t, &t->knot, t->dealloc_fn);
-    void (*p)(void *, void *) = t->il->deallocate;
+    void (*ptf)(void *, void *) = t->il->deallocate;
     if(t->allocator != NULL)
         allocator_std_delete((allocator_std *)t->allocator);
-    p(NULL, t);
+    ptf(NULL, t);
 }
 
 void tree_add_object(tree_t *t, void *o)
@@ -103,10 +109,7 @@ void tree_add_object(tree_t *t, void *o)
     *knot = knot_create(tmp_data, t->il, tmp_parent);
 
     if(tmp_parent == NULL)
-    {
         (*knot)->parent = *knot;
-        t->root_knot = t->curr_knot = *knot;
-    }
 }
 
 void *tree_fnd_object(tree_t *t, void *o)
@@ -145,37 +148,31 @@ static knot_t *knot_create(void *data, iallocator *il, knot_t *parent)
 
 static void knot_print(knot_t *knot, void (*print_fn)(void *o))
 {
-    if(knot == NULL)
-        return;
-
-    knot_print(knot->left, print_fn);
-    print_fn(knot->data);
-    knot_print(knot->right, print_fn);
+    if(knot != NULL)
+    {
+        knot_print(knot->left, print_fn);
+        print_fn(knot->data);
+        knot_print(knot->right, print_fn);
+    }
 }
 
 static void knot_delete_all(tree_t *t, knot_t **knot, void (*dealloc_fn)(void *o))
 {
-    if(*knot == NULL)
-        return; 
-
-    knot_delete_all(t, &(*knot)->left, dealloc_fn);
-    knot_delete_all(t, &(*knot)->right, dealloc_fn);
-    dealloc_fn((*knot)->data);
-    t->il->deallocate(NULL, *knot);
+    if(*knot != NULL)
+    {
+        knot_delete_all(t, &(*knot)->left, dealloc_fn);
+        knot_delete_all(t, &(*knot)->right, dealloc_fn);
+        if(dealloc_fn != NULL)
+            dealloc_fn((*knot)->data);
+        t->il->deallocate(NULL, *knot);
+    }
 }
 
 static void knot_delete(knot_t *knot, void (*dealloc_fn)(void *data))
 {
-    dealloc_fn(knot->data);
+    if(dealloc_fn != NULL)
+        dealloc_fn(knot->data);
     free(knot);
 }
 
-static void *pointer_to_object(void *o)
-{
-    return o;
-}
-
-static void reset(tree_t *t)
-{
-    t->curr_knot = t->root_knot;
-}
+static void *copy_fake(void *o) { return o; }
