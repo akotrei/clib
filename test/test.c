@@ -32,7 +32,7 @@ int main(int argc, char **args)
 void print(void *o)
 {
     int *a = (int *)o;
-    printf("%d\n", *a);
+    printf("[%d]", *a);
 }
 
 int test_tree_cmp_fn(void *obj1, void *obj2)
@@ -41,15 +41,15 @@ int test_tree_cmp_fn(void *obj1, void *obj2)
     int *tmp_obj2 = (int *)obj2;
     if(*tmp_obj1 < *tmp_obj2)
         return 1;
-    else 
+    if(*tmp_obj1 > *tmp_obj2)
         return -1;
     return 0;
 }
 
 void test_tree_delete(void *o)
 {
-    int *a = (int*)o;
-    free(a);
+        int *a = (int*)o;
+        free(a);
 }
 
 void test_tree_1()
@@ -59,22 +59,48 @@ void test_tree_1()
     int d;// = (int *)malloc(sizeof(int));
     int f;// = (int *)malloc(sizeof(int));
     int c;// = (int *)malloc(sizeof(int));
-    a = 5;
-    b = 6;
+    int e,g,h,j,i;
+    a = 1;
+    b = 2;
     c = 3;
-    d = 2;
-    f = 7;
+    d = 4;
+    e = 5;
+    f = 6;
+    g = 7;
+    h = 8;
+    i = 9;
+    j = 10;
     tree_t *t = tree_create(test_tree_cmp_fn, NULL, NULL/*test_tree_delete*/, NULL);
 
-    tree_add_object(t, &a);
-    tree_add_object(t, &b);
-    tree_add_object(t, &c);
-    tree_add_object(t, &d);
     tree_add_object(t, &f);
+    tree_add_object(t, &d);
+    tree_add_object(t, &e);
+    tree_add_object(t, &i);
+    tree_add_object(t, &j);
+    tree_add_object(t, &h);
+    tree_add_object(t, &g);
+    tree_add_object(t, &b);
+    tree_add_object(t, &a);
+    tree_add_object(t, &c);
 
     tree_print(t, print);
+    
+    void *p = tree_fnd_object(t, &d);
+    printf("\n\n%p\n", p);
 //    tree_fnd_object(t, f);
-    tree_delete(t);
+
+    tree_rmv_object(t, &f);
+    tree_rmv_object(t, &i);
+
+    tree_test_addresses(t, print);
+
+//    tree_rmv_object(t, &c);
+//    tree_rmv_object(t, &f);
+
+    printf("\n\n");
+    tree_print(t, print);
+
+//    tree_delete(t);
 //    free(a);
 //    tree_print(t, print);
 }

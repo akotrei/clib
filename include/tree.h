@@ -88,4 +88,6 @@ void tree_rmv_object(tree_t *t, void *o);
 */
 void tree_print(tree_t *t, void (*print_fn)(void *o));
 
+void tree_test_addresses(tree_t *t, void (*print_fn)(void *o));
+
 #endif /* __TREE_H__ */
