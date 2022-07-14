@@ -10,8 +10,8 @@
 typedef struct _tree_t tree_t;
 
 /*
- * function @tree_create create empty tree and return pointer to created tree
- * @compare_fn    - pointer to function which compare @o1, @o2 and return -1, 
+ * function @tree_create creates an empty tree and returns a pointer to a created tree
+ * @compare_fn    - pointer to a function which compares @o1, @o2 and returns -1, 
  *                  0 if ">" else return 1, if @compare_fn is equal NULL, then 
  *                  it will not be possible to add knots to the tree 
  * @copy_fn       - pointer to function copy @o transferred this function, if 
@@ -37,9 +37,16 @@ void tree_delete(tree_t *t);
 
 /*
  * function @tree_get_data return pointer that have access at data of user object
- * @knot    - pointer to knot in the tree 
+ * @knot    - pointer to knot in the tree
+ * returns a pointer to root knot 
+ * note: returned pointer is a pointer to internal structre and must be used in functions @tree_iter_left @tree_iter_right
 */
-void* tree_get_data(void *knot);
+void* tree_get_iterator(tree_t *tree);
+/ @knot must be received from @tree_get_iterator
+void* tree_iter_left(void *knot);
+void* tree_iter_right(void *knot);
+void* tree_iter_parent(...);
+void* tree_get_from_knot(void* knot);
 
 /*
  * function @tree_get_left_subtree return pointer to left subtree current of knot which transferred in this function
@@ -92,6 +99,6 @@ void tree_print(tree_t *t, void (*print_fn)(void *o));
  * function of tree balance 
  * @t    - pointer to the tree
 */
-void tree_balance_algorithm_DSW(tree_t *t);
+void tree_balance_DSW(tree_t *t);
 
 #endif /* __TREE_H__ */
