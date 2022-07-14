@@ -72,7 +72,7 @@ void test_tree_1()
     j = 10;
     tree_t *t = tree_create(test_tree_cmp_fn, NULL, NULL/*test_tree_delete*/, NULL);
 
-    tree_add_object(t, &f);
+/*    tree_add_object(t, &f);
     tree_add_object(t, &d);
     tree_add_object(t, &e);
     tree_add_object(t, &i);
@@ -81,7 +81,18 @@ void test_tree_1()
     tree_add_object(t, &g);
     tree_add_object(t, &b);
     tree_add_object(t, &a);
+    tree_add_object(t, &c);*/
+
+    tree_add_object(t, &a);
+    tree_add_object(t, &b);
     tree_add_object(t, &c);
+    tree_add_object(t, &d);
+    tree_add_object(t, &e);
+    tree_add_object(t, &f);
+    tree_add_object(t, &g);
+    tree_add_object(t, &h);
+    tree_add_object(t, &i);
+    tree_add_object(t, &j);
 
     tree_print(t, print);
     
@@ -90,9 +101,11 @@ void test_tree_1()
 //    tree_fnd_object(t, f);
 
     tree_rmv_object(t, &f);
-    tree_rmv_object(t, &i);
+    //tree_rmv_object(t, &i);
+    //tree_rmv_object(t, &b);
+    //tree_rmv_object(t, &g);
 
-    tree_test_addresses(t, print);
+    //tree_test_addresses(t, print);
 
 //    tree_rmv_object(t, &c);
 //    tree_rmv_object(t, &f);
@@ -100,7 +113,13 @@ void test_tree_1()
     printf("\n\n");
     tree_print(t, print);
 
-//    tree_delete(t);
+//    tree_test_addresses(t, print);
+    tree_balance_algorithm_DSW(t);
+
+    printf("\n\n");
+    tree_print(t, print);
+
+    tree_delete(t);
 //    free(a);
 //    tree_print(t, print);
 }

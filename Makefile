@@ -65,6 +65,24 @@ allocator_std_so: allocator_std_obj
 ####################################
 
 ####################################
+# algorithm
+algorithm_c 	= $(src)/algorithm.c
+algorithm_o 	= algorithm.o
+algorithm_so 	= $(lib)/libalgorithm.so
+
+algorithm_obj: $(algorithm_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-c $(algorithm_c) \
+	-o $(algorithm_o)
+
+algorithm_so: algorithm_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(algorithm_so) $(algorithm_o)
+	rm $(algorithm_o)
+####################################
+
+####################################
 # list
 list_c 	= $(src)/list.c
 list_o 	= list.o
@@ -97,7 +115,7 @@ test_obj: $(test_c)
 test_exe: test_obj
 	gcc -Wall -$(CXX_FLAG) \
 	-o $(test_exe) $(test_o) \
-	-L$(lib) -lcontainer -ltree -lallocator_std
+	-L$(lib) -lcontainer -ltree -lallocator_std -lm
 	rm $(test_o)
 # ========================
 ####################################

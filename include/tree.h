@@ -88,6 +88,10 @@ void tree_rmv_object(tree_t *t, void *o);
 */
 void tree_print(tree_t *t, void (*print_fn)(void *o));
 
-void tree_test_addresses(tree_t *t, void (*print_fn)(void *o));
+/*
+ * function of tree balance 
+ * @t    - pointer to the tree
+*/
+void tree_balance_algorithm_DSW(tree_t *t);
 
 #endif /* __TREE_H__ */
