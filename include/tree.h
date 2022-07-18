@@ -5,93 +5,92 @@
 #include "interface.h"
 
 /*
- * tree type @tree_t declaration
- */
+ *  tree type @tree_t declaration
+*/
 typedef struct _tree_t tree_t;
 
 /*
- * function @tree_create create empty tree and return pointer to created tree
- * @compare_fn    - pointer to function which compare @o1, @o2 and return -1, 
- *                  0 if ">" else return 1, if @compare_fn is equal NULL, then 
- *                  it will not be possible to add knots to the tree 
- * @copy_fn       - pointer to function copy @o transferred this function, if 
- *                  @copy_fn is equal NULL then the tree will store pointers
- *                  to the objects that are added to it, else, objects which 
- *                  will store in the tree will be copies
- * @dealloc_fn    - pointer to function which delete @o transferred this function,
- *                  if @dealloc_fn is equal NULL then will be removed pointers on
- *                  objects in the tree, else, when deleting a tree, the objects
- *                  that are in it will be deleted
- * @il            - pointer to variable(interface of allocator) which has 
- *                  pointers to memory allocation and deallocation functions, if
- *                  @il is equal NULL then allocator create in function 
- *                  @tree_create, else, not create 
+ * The function @tree_create creates an empty tree and returns a pointer to this created tree
+ *
+ * @compare_fn    - a pointer to a function that takes two objects to compare and returns 1 
+ *                  if @o1 is less than @o2, -1 if @o1 is greater than @o2, if the objects 
+ *                  are equal then 0 is returned. Note: the user must take this into account,
+ *                  since the functions of searching, deleting, adding an object will not work correctly
+ *
+ * @copy_fn       - a pointer to a function that copies the user object to a tree if the copy 
+ *                  function is passed when creating a tree, otherwise if NULL is passed, then 
+ *                  pointers to user objects will be stored in the knots of the tree, that is, 
+ *                  user data will be stored in the form of a tree
+ *
+ * @dealloc_fn    - a pointer to a function that deletes the user object and the user decides how he will 
+ *                  delete this object, if the user does not pass a pointer to his object deletion function 
+ *                  to the function of creating a tree and NULL, then the tree will store 
+ *                  only pointers to user objects
+ *
+ * @il            - a pointer to an allocator interface that implements the functions of allocating and 
+ *                  freeing memory when creating a tree and its knots. If you pass NULL to this 
+ *                  parameter in the tree creation function, then the allocator will be created 
+ *                  when the tree is created
 */
 tree_t* tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void *o), void (*dealloc_fn)(void *o), iallocator *il);
 
 /*
- * function @tree_delete delete created tree 
- * @t    - pointer to the tree 
+ * the function @tree_delete removes the created tree using recursion
+ *
+ * @t    - pointer to the tree
 */
 void tree_delete(tree_t *t);
 
-/*
- * function @tree_get_data return pointer that have access at data of user object
- * @knot    - pointer to knot in the tree 
-*/
-void* tree_get_data(void *knot);
-
-/*
- * function @tree_get_left_subtree return pointer to left subtree current of knot which transferred in this function
- * @knot    - pointer to knot in the tree
-*/
-void* tree_get_left_subtree(void *knot);
-
-/*
- * function @tree_get_right_subtree return pointer to right subtree current of knot which transferred in this function
- * @knot    - pointer to knot in the tree
-*/
-void* tree_get_right_subtree(void *knot);
-
-/*
- * function @tree_get_parent_knot return pointer to knot that preceded current knot which transferred in this function
- * @knot    - pointer to knot in the tree
-*/
-void* tree_get_parent_knot(void *knot);
-
 /* 
- * function @tree_add_object adds new object in tree creating knot where will store added this object
- * @t    - pointer to the tree 
+ * function @tree_add_object adds a user object to the  tree by creating a new knot 
+ * in the tree which will store either a copy of the added object or a pointer. Adding 
+ * occurs by comparing the objects that are in the tree with the one we want to add 
+ * to it. If the added object is less than the current one, then it goes to the left subtree 
+ * of this current knot, otherwise, to the right subtree
+ *
+ * @t    - pointer to the tree
+ *
  * @o    - pointer to user object which added in the tree
 */
 void tree_add_object(tree_t *t, void *o);
 
 /*
- * function finding of object in the tree and return pointer to the knot in which is this object
+ * function @tree_fnd_object finds the knot in which the pointer to the user object is 
+ * located and returns it, if there is no such object, the NULL is returned
+ *
  * @t    - pointer to the tree
+ *
  * @o    - pointer to user object which to be found in the tree
 */
 void* tree_fnd_object(tree_t *t, void *o);
 
 /*
- * function of deletion knot and object that store in this knot 
+ * function @tree_rmv_object finds the knot in which the data that the user wants to 
+ * delete, the knot is deleted and the function returns a pointer to the data contained 
+ * in the deleted knot, otherwise, if there is no knot to delete, the function returns NULL
+ *
  * @t    - pointer to the tree
+ *
  * @o    - pointer to user object which to be removed in the tree
 */
-void tree_rmv_object(tree_t *t, void *o);
+void* tree_rmv_object(tree_t *t, void *o);
 
 /* 
- * function @tree_print print in console tree
+ * function @tree_print print in console tree using recursion
+ *
  * @t           - pointer to the tree
+ *
  * @print_fn    - pointer to print function which user will implement self
- * @o           - pointer to object 
+ *
+ * @o           - pointer to object
 */
 void tree_print(tree_t *t, void (*print_fn)(void *o));
 
 /*
- * function of tree balance 
+ * function of tree balance using Day-Stout-Warren algorithm
+ *
  * @t    - pointer to the tree
 */
-void tree_balance_algorithm_DSW(tree_t *t);
+void tree_balance_DSW(tree_t *t);
 
 #endif /* __TREE_H__ */

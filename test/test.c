@@ -31,8 +31,11 @@ int main(int argc, char **args)
 
 void print(void *o)
 {
-    int *a = (int *)o;
-    printf("[%d]", *a);
+    if(o != NULL)
+    {
+        int *a = (int *)o;
+        printf("[%d]", *a);
+    }
 }
 
 int test_tree_cmp_fn(void *obj1, void *obj2)
@@ -54,12 +57,40 @@ void test_tree_delete(void *o)
 
 void test_tree_1()
 {
-    int a;// = (int *)malloc(sizeof(int));
+    const int N = 10;
+    int arr[] = {1,1,5,-5,3,2,7,8,10,9};
+
+    for(int i = 0; i < N; i++)
+        printf("%d\n", arr[i]);
+
+    tree_t *t1 = tree_create(test_tree_cmp_fn, NULL, NULL/*test_tree_delete*/, NULL);
+
+    for(int i = 0; i < N; i++)
+        tree_add_object(t1, &arr[i]);
+
+    tree_print(t1, print);
+    tree_balance_DSW(t1);
+    printf("\n\n");
+    tree_print(t1, print);
+        printf("ff  \n\n");
+    for(int i = 0; i < N; i++)
+    {
+        printf("ff  ");
+        tree_rmv_object(t1, &arr[i]);
+    }
+
+    //tree_delete(t1);
+    printf("\n\n11111111111111111111111111111\n\n");
+    tree_print(t1, print);
+    
+    printf("\n\n\n\n\n\n");
+
+/*   int a;// = (int *)malloc(sizeof(int));
     int b;// = (int *)malloc(sizeof(int));
     int d;// = (int *)malloc(sizeof(int));
     int f;// = (int *)malloc(sizeof(int));
     int c;// = (int *)malloc(sizeof(int));
-    int e,g,h,j,i;
+    int e,g,h,j,i, k, l, m;
     a = 1;
     b = 2;
     c = 3;
@@ -70,7 +101,10 @@ void test_tree_1()
     h = 8;
     i = 9;
     j = 10;
-    tree_t *t = tree_create(test_tree_cmp_fn, NULL, NULL/*test_tree_delete*/, NULL);
+    k = 11;
+    l = 12;
+    m = 13;*/
+    //tree_t *t = tree_create(test_tree_cmp_fn, NULL, NULL/*test_tree_delete*/, NULL);
 
 /*    tree_add_object(t, &f);
     tree_add_object(t, &d);
@@ -83,7 +117,15 @@ void test_tree_1()
     tree_add_object(t, &a);
     tree_add_object(t, &c);*/
 
-    tree_add_object(t, &a);
+   /* tree_add_object(t, &f);
+    tree_add_object(t, &j);
+    tree_add_object(t, &i);
+    tree_add_object(t, &m);
+    tree_add_object(t, &k);
+    tree_add_object(t, &l);
+    tree_add_object(t, &h);*/
+
+    /*tree_add_object(t, &a);
     tree_add_object(t, &b);
     tree_add_object(t, &c);
     tree_add_object(t, &d);
@@ -93,14 +135,28 @@ void test_tree_1()
     tree_add_object(t, &h);
     tree_add_object(t, &i);
     tree_add_object(t, &j);
-
-    tree_print(t, print);
+    tree_add_object(t, &k);
+    tree_add_object(t, &l);
+    tree_add_object(t, &m);*/
     
-    void *p = tree_fnd_object(t, &d);
-    printf("\n\n%p\n", p);
+
+    //tree_print(t, print);
+    
+    //void *p = tree_fnd_object(t, &d);
+    //printf("\n\n%p\n", p);
 //    tree_fnd_object(t, f);
 
-    tree_rmv_object(t, &f);
+
+   // /*int *mmm = (int *)*/tree_rmv_object(t, &j);
+//  printf("\n\n%d\n", *mmm);
+//    tree_rmv_object(t, &h);
+   // tree_rmv_object(t, &f);
+   // tree_rmv_object(t, &k);
+   // tree_rmv_object(t, &i);
+    //tree_rmv_object(t, &l);
+    //tree_rmv_object(t, &m);
+
+    //tree_rmv_object(t, &f);
     //tree_rmv_object(t, &i);
     //tree_rmv_object(t, &b);
     //tree_rmv_object(t, &g);
@@ -111,15 +167,15 @@ void test_tree_1()
 //    tree_rmv_object(t, &f);
 
     printf("\n\n");
-    tree_print(t, print);
+   // tree_print(t, print);
 
 //    tree_test_addresses(t, print);
-    tree_balance_algorithm_DSW(t);
+    //tree_balance_DSW(t);
 
     printf("\n\n");
-    tree_print(t, print);
+    //tree_print(t, print);
 
-    tree_delete(t);
+ //   tree_delete(t);
 //    free(a);
 //    tree_print(t, print);
 }

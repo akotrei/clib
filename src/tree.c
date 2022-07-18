@@ -1,6 +1,5 @@
 #include "tree.h"
 #include "allocator_std.h"
-#include "itree.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -18,127 +17,111 @@ typedef struct _knot_t knot_t;
 */
 typedef struct _knot_t
 {
-    void*      data;      /*@data   - pointer to object which will store in this struct*/
-    knot_t*    left;      /*@left   - pointer to left subtree*/
-    knot_t*    right;     /*@right  - pointer to right subtree*/
-    knot_t*    parent;    /*@parent - pointer to previous knot*/
-}_knot_t;
+    void*      data;      /*@data      - pointer to the user object that is in the tree knot*/
+
+    knot_t*    left;      /*@left      - pointer to left subtree*/
+
+    knot_t*    right;     /*@right     - pointer to right subtree */
+
+    knot_t*    parent;    /*@parent    - pointer to previous knot*/
+
+} _knot_t;
 
 /*
  * definition @_tree_t type of the tree
 */
 typedef struct _tree_t
 {
-    iallocator*    il;                              /*@il         - pointer to interface of allocator which can allocate and deallocate memory use functions*/
-    void*          allocator;                       /*@allocator  - pointer to standard allocator which have functions @malloc and @free 
-                                                                    for allocate and deallocate memory*/
-    int            (*compare_fn)(void *, void *);   /*@compare_fn - pointer to function that can compare transferred her objects. 
-                                                                    This function should implement user, because he decided how objects should be compared. 
-                                                                    You can find out what result the function returns by looking at the comments in the file @tree.h*/
-    void*          (*copy_fn)(void *);              /*@copy_fn    - pointer to function that return pointer to copy of object which was transferred of user and
-                                                                    thereafter knot store copy of user object. More detailed description you can find in the file @tree.h*/
-    void           (*dealloc_fn)(void *);           /*@dealloc_fn - pointer to function that implement user for delete object*/
-    knot_t*        knot;                            /*@knot       - pointer to knot of the tree*/
-    itree          it;                              /*@it         - variable of interface of tree, with which possible use balance for the tree.
-                                                                    Details about the interface can be found in the file @itree.h*/
-}_tree_t;
+    iallocator*    interface_allocator;                  /*@interface_allocator    - pointer to the allocator interface that is 
+                                                                                     responsible for allocating and freeing memory*/
 
-/* 
- * function @knot_create for create knot in the tree and return pointer to created knot 
- * @data      - pointer to data which store knot in the tree
- * @il        - pointer to interface of allocator that will allocate memory for knot 
- * @parent    - pointer to previous knot
-*/
-static knot_t *knot_create(void *data, iallocator *il, knot_t *parent);
+    void*          allocator_standard;                   /*@allocator_standard     - pointer to standard allocator that allocates
+                                                                                     and frees memory using @malloc and @free functions*/
+
+    int            (*compare_fn)(void *o1, void *o2);    /*@compare_fn             - pointer to a function that compares two objects 
+                                                                                     passed to it and returns the result. For a more 
+                                                                                     detailed description of the function, go to the file @tree.h*/
+
+    void*          (*copy_fn)(void *o);                  /*@copy_fn                - pointer to a function that copies the user object to the tree knot*/
+
+    void           (*dealloc_fn)(void *o);               /*@dealloc_fn             - pointer to a function that removes the user object from the tree*/
+
+    knot_t*        knot;                                 /*@knot                   - pointer to the root of the tree*/
+
+} _tree_t;
 
 /*
- * function @knot_delete_all_knots for deleting all knots in the tree 
- * @t             - pointer to the tree 
- * @knot          - pointer to the knot 
- * @dealloc_fn    - pointer to function that delete user object
- * @o             - pointer to deleting user object
+ * knot creation function @knot_create that returns a pointer to the created knot
+ *
+ * @data                   - pointer to user object
+ *
+ * @interface_allocator    - pointer to allocator interface
+ *
+ * @parent                 - pointer to previous knot
+*/
+static knot_t* knot_create(void *data, iallocator *interface_allocator, knot_t *parent);
+
+/*
+ *
 */
 static void knot_delete_all_knots(tree_t *t, knot_t **knot, void (*dealloc_fn)(void *o));
 
 /*
- * function @copy_fake return pointer to user object 
- * @o    - pointer to user object
+ *
 */
 static void* copy_fake(void *o);
 
 /*
- * function for printing tree in console 
- * @knot        - pointer to the knot
- * @print_fn    - pointer to function implemented by the user that print @o object in a console
- * @level       - a variable that stores tha height of the tree
+ *
 */
 static void knot_print(knot_t *knot, void (*print_fn)(void *o), int level);
 
-tree_t *tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void *o), void (*dealloc_fn)(void *o), iallocator *il)
+tree_t* tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void *o), void (*dealloc_fn)(void *o), iallocator *interface_allocator)
 {
-    // pointer to interface of allocator 
     iallocator *_il;
-
-    // pointer to standard allocator 
     allocator_std *al = NULL;
-
-    // if user passed to function @il is equal NULL, then create standard(malloc and free) allocator for allocate of memory
-    if(il == NULL)
+    if(interface_allocator == NULL)
     {
-        // create standard allocator 
         al = allocator_std_new();
-
-        // cast standard allocator to type interface to use functions of allocate and freeing memory
         _il = allocator_std_get_allocator(al);
     }
     else 
     {
-        // if user passed to function @il is not equal NULL
-        _il = il;
+        _il = interface_allocator;
     }
 
-    // create the tree with help interface of allocator 
     tree_t *t = (tree_t *)_il->allocate(_il, sizeof(tree_t));
     assert(t != NULL && "memory for @tree hasn't been allocated");
 
-    // tree structure field initialization 
-    t->il = _il;
+    t->interface_allocator = _il;
     t->compare_fn = compare_fn;
     t->dealloc_fn = dealloc_fn;
-    t->allocator = (void *)al;
-    t->it.self = t;
-    t->it.get_data = tree_get_data;
-    t->it.get_left = tree_get_left_subtree;
-    t->it.get_right = tree_get_right_subtree;
-    t->it.get_parent = tree_get_parent_knot;
-    t->it.add_elem = tree_add_object;
-    t->it.del_elem = tree_rmv_object;
-    t->it.fnd_elem = tree_fnd_object;
+    t->allocator_standard = (void *)al;
     t->knot = NULL;
-
-    // function of copy object, if @copy_fn is equal NULL then user objects will be copied in this tree, else, the tree will be store pointers on this objects
     if(copy_fn != NULL)
         t->copy_fn = copy_fn;
     else 
         t->copy_fn = copy_fake;
-
-    // return created the tree 
     return t;
 }
 
 void tree_delete(tree_t *t)
 {
     knot_delete_all_knots(t, &t->knot, t->dealloc_fn);
-    void (*ptf)(void *, void *) = t->il->deallocate;
-    if(t->allocator != NULL)
-        allocator_std_delete((allocator_std *)t->allocator);
-    ptf(NULL, t);
+
+    void (*tmp_deallocate)(void *, void *) = t->interface_allocator->deallocate;
+    if(t->allocator_standard != NULL)
+        allocator_std_delete((allocator_std *)t->allocator_standard);
+    tmp_deallocate(NULL, t);
+    t = NULL;
 }
 
 void tree_add_object(tree_t *t, void *o)
 {
     assert(t->compare_fn != NULL && "tree was created with @cpm_fn = NULL");
+
     knot_t **knot = &t->knot;
+
     knot_t *tmp_parent = *knot;
     while(*knot != NULL)
     {
@@ -148,8 +131,9 @@ void tree_add_object(tree_t *t, void *o)
         else
             knot = &(*knot)->right;
     }
+
     void *tmp_data = t->copy_fn(o);
-    *knot = knot_create(tmp_data, t->il, tmp_parent);
+    *knot = knot_create(tmp_data, t->interface_allocator, tmp_parent);
 
     if(tmp_parent == NULL)
         (*knot)->parent = *knot;
@@ -174,7 +158,7 @@ void* tree_fnd_object(tree_t *t, void *o)
     return (void *)(*knot);
 }
 
-void tree_rmv_object(tree_t *t, void *o)
+void* tree_rmv_object(tree_t *t, void *o)
 {
     knot_t **knot = &t->knot;
     while(*knot != NULL)
@@ -187,31 +171,32 @@ void tree_rmv_object(tree_t *t, void *o)
         {
             if((*knot)->left == NULL && (*knot)->right == NULL)
             {
-                if(t->dealloc_fn != NULL)
-                    t->dealloc_fn((*knot)->data);
-                t->il->deallocate(NULL, *knot);
+                void *data_of_deleting_knot = (*knot)->data;
+                t->interface_allocator->deallocate(NULL, *knot);
                 *knot = NULL;
-                break;
+                return data_of_deleting_knot;
             }
-
+            
             if((*knot)->left != NULL && (*knot)->right == NULL)
             {
+                void *data_of_deleting_knot = (*knot)->data;
+                knot_t* tmp = *knot;
                 *knot = (*knot)->left;
-                if(t->dealloc_fn != NULL)
-                    t->dealloc_fn((*knot)->parent->data);
-                t->il->deallocate(NULL, (*knot)->parent);
-                (*knot)->parent = NULL;
-                break;
+                (*knot)->parent = tmp->parent;
+                t->interface_allocator->deallocate(NULL, tmp);
+                tmp = NULL;
+                return data_of_deleting_knot;
             }
 
             if((*knot)->right != NULL && (*knot)->left == NULL)
             {
+                void *data_of_deleting_knot = (*knot)->data;
+                knot_t* tmp = *knot;
                 *knot = (*knot)->right;
-                if(t->dealloc_fn != NULL)
-                    t->dealloc_fn((*knot)->parent->data);
-                t->il->deallocate(NULL, (*knot)->parent);
-                (*knot)->parent = NULL;
-                break;
+                (*knot)->parent = tmp->parent;
+                t->interface_allocator->deallocate(NULL, tmp);
+                tmp = NULL;
+                return data_of_deleting_knot;
             }
 
             if((*knot)->left != NULL && (*knot)->right != NULL)
@@ -221,50 +206,29 @@ void tree_rmv_object(tree_t *t, void *o)
                 while((*tmp)->left != NULL)
                     tmp = &(*tmp)->left;
                 
-                int so = sizeof((*tmp)->data);
-                void *tmp_data = (void *)malloc(so);
-                memcpy(tmp_data, (*tmp)->data, so);
-                (*knot)->data = tmp_data;
+                void *data_of_deleting_knot = (*knot)->data;
+                (*knot)->data = (*tmp)->data;
+                (*tmp)->data = data_of_deleting_knot;
+                knot_t *deleting_knot = *tmp;
 
                 if((*tmp)->right != NULL)
                 {
                     *tmp = (*tmp)->right;
-                    (*tmp)->parent = NULL;
+                    (*tmp)->parent = deleting_knot->parent;
+                    t->interface_allocator->deallocate(NULL, deleting_knot);
+                    deleting_knot = NULL;
+                    return data_of_deleting_knot;
                 }
-
-                if(t->dealloc_fn != NULL)
-                    t->dealloc_fn((*tmp)->data);
-                t->il->deallocate(NULL, *tmp);
-                *tmp = NULL;
-                break;
+                if((*tmp)->right == NULL) 
+                {
+                    t->interface_allocator->deallocate(NULL, *tmp);
+                    *tmp = NULL;
+                    return data_of_deleting_knot;
+                }
             }
-            break;
         }
     }
-}
-
-void* tree_get_data(void *knot)
-{
-    knot_t *tmp_knot = (knot_t *)knot;
-    return tmp_knot->data;
-}
-
-void* tree_get_left_subtree(void *knot)
-{
-    knot_t *tmp_knot = (knot_t *)knot;
-    return tmp_knot->left;
-}
-
-void* tree_get_right_subtree(void *knot)
-{
-    knot_t *tmp_knot = (knot_t *)knot;
-    return tmp_knot->right;
-}
-
-void* tree_get_parent_knot(void *knot)
-{
-    knot_t *tmp_knot = (knot_t *)knot;
-    return tmp_knot->parent;
+    return NULL;
 }
 
 void tree_print(tree_t *t, void (*print_fn)(void *o))
@@ -272,10 +236,10 @@ void tree_print(tree_t *t, void (*print_fn)(void *o))
     knot_print(t->knot, print_fn, 0);
 }
 
-static knot_t *knot_create(void *data, iallocator *il, knot_t *parent)
+static knot_t *knot_create(void *data, iallocator *interface_allocator, knot_t *parent)
 {
     knot_t *knot;
-    knot = (knot_t *)il->allocate(il, sizeof(knot_t));
+    knot = (knot_t *)interface_allocator->allocate(interface_allocator, sizeof(knot_t));
     assert(knot != NULL && "memory for @knot hasn't been allocated");
 
     knot->data = data;
@@ -311,7 +275,7 @@ static void knot_delete_all_knots(tree_t *t, knot_t **knot, void (*dealloc_fn)(v
         knot_delete_all_knots(t, &(*knot)->right, dealloc_fn);
         if(dealloc_fn != NULL)
             dealloc_fn((*knot)->data);
-        t->il->deallocate(NULL, *knot);
+        t->interface_allocator->deallocate(NULL, *knot);
     }
 }
 
@@ -358,7 +322,7 @@ static void compress(knot_t *grand, int m)
 
 static knot_t* tree_balance(tree_t *t)
 {
-    knot_t *grand = knot_create(NULL, t->il, NULL); 
+    knot_t *grand = knot_create(NULL, t->interface_allocator, NULL); 
     grand->right = t->knot;
     int count = bst_to_vine(grand);
     int h = log2((double)(count + 1));
@@ -367,8 +331,8 @@ static knot_t* tree_balance(tree_t *t)
     for(m = m / 2; m > 0; m /= 2)
         compress(grand, m);
     knot_t *result = grand->right;
-    t->il->deallocate(NULL, grand);
+    t->interface_allocator->deallocate(NULL, grand);
     return result;
 }
 
-void tree_balance_algorithm_DSW(tree_t *t) { t->knot = (knot_t *)tree_balance(t); }
+void tree_balance_DSW(tree_t *t) { t->knot = (knot_t *)tree_balance(t); }
