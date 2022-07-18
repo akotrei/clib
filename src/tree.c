@@ -62,17 +62,25 @@ typedef struct _tree_t
 static knot_t* knot_create(void *data, iallocator *interface_allocator, knot_t *parent);
 
 /*
+ * function @knot_delete_all_knots to delete all knots in the tree using recursion 
+ * 
+ * @t             - pointer to the tree
  *
+ * @knot          - pointer to pointer to knot in tree
+ *
+ * @dealloc_fn    - pointer to a user object delete function 
 */
 static void knot_delete_all_knots(tree_t *t, knot_t **knot, void (*dealloc_fn)(void *o));
 
 /*
+ * a function @copy_fake that returns a pointer to the user object
  *
+ * @o    - pointer to user object 
 */
 static void* copy_fake(void *o);
 
 /*
- *
+ * 
 */
 static void knot_print(knot_t *knot, void (*print_fn)(void *o), int level);
 
