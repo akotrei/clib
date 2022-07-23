@@ -1,10 +1,10 @@
 #include "allocator_std.h"
-#include <stdlib.h> 
+#include <stdlib.h>
 
-typedef struct allocator_std 
+typedef struct _allocator_std_t
 {
-    iallocator il;
-};
+    iallocator_t iallocator;
+} _allocator_std_t;
 
 static void *_alloc_std(void *self, int bytes)
 {
@@ -16,20 +16,22 @@ static void _dealloc_std(void *self, void *addr)
     free(addr);
 }
 
-allocator_std *allocator_std_new()
+allocator_std_t *allocator_std_new()
 {
-    allocator_std *al = (allocator_std *)malloc(sizeof(allocator_std));
-    al->il.allocate = _alloc_std;
-    al->il.deallocate = _dealloc_std;
-    return al;
+    allocator_std_t *allocator_std = (allocator_std_t *)malloc(sizeof(allocator_std_t));
+    allocator_std->iallocator.allocate = _alloc_std;
+    allocator_std->iallocator.deallocate = _dealloc_std;
+    return allocator_std;
 }
 
-void allocator_std_delete(allocator_std *allocator)
+void allocator_std_delete(allocator_std_t *allocator_std)
 {
-    free(allocator);
+    free(allocator_std);
 }
 
-iallocator *allocator_std_get_allocator(allocator_std *allocator)
+iallocator_t *allocator_std_get_allocator(allocator_std_t *allocator_std)
 {
-    return &allocator->il;
+    iallocator_t* iallocator = &(allocator_std->iallocator);
+    iallocator->self = allocator_std;
+    return iallocator;
 }

@@ -89,6 +89,8 @@ void test_tree_1()
     tree_add_object(t1, a7);
 //    tree_add_object(t1, f);
 
+
+
     tree_print(t1, print);
     
     int *r3 = (int*)tree_rmv_object(t1, a2);
