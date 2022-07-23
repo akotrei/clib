@@ -37,9 +37,9 @@ tree_t* tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void
 /*
  * the function @tree_delete removes the created tree using recursion
  *
- * @t    - pointer to the tree
+ * @t    - pointer to pointer to the tree
 */
-void tree_delete(tree_t *t);
+void tree_delete(tree_t **t);
 
 /* 
  * function @tree_add_object adds a user object to the  tree by creating a new knot 
