@@ -31,7 +31,7 @@ int main(int argc, char **args)
 //    test_container_2();
 //    test_container_3();
     test_tree_1();
-    test_tree_2();
+//    test_tree_2();
     return 0;
 }
 
@@ -108,9 +108,19 @@ void test_tree_1()
     printf("%d\n", *a6);
     printf("%d\n", *a7);
 
-    tree_delete(&t1);
+    tree_delete(t1);
+    printf("%p\n", t1);
 //    tree_print(t1, print);
 //    free(a1);
+    free(a1);
+    free(a2);
+    free(a3);
+    free(a4);
+    free(a5);
+    free(a6);
+    free(a7);
+    free(r3);
+    free(r4);
 }
 
 void print_obj(void *o)
