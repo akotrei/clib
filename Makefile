@@ -32,7 +32,7 @@ container_so: container_obj
 # tree
 tree_c 	= $(src)/tree.c
 tree_o 	= tree.o
-tree_so 	= $(lib)/libtree.so
+tree_so = $(lib)/libtree.so
 
 tree_obj: $(tree_c)
 	gcc -Wall -$(CXX_FLAG) -fPIC \
@@ -86,11 +86,12 @@ algorithm_so: algorithm_obj
 # list
 list_c 	= $(src)/list.c
 list_o 	= list.o
-list_so 	= $(lib)/liblist.so
+list_so = $(lib)/liblist.so
 
 list_obj: $(list_c)
 	gcc -Wall -$(CXX_FLAG) -fPIC \
 	-I $(include) \
+	-I $(include)/list \
 	-c $(list_c) \
 	-o $(list_o)
 
@@ -117,5 +118,25 @@ test_exe: test_obj
 	-o $(test_exe) $(test_o) \
 	-L$(lib) -lcontainer -ltree -lallocator_std -lm
 	rm $(test_o)
+####################################
+
+####################################
+# test_list
+test_list_c = $(CURRENT_DIR)/test/test_list.c
+test_list_o = $(CURRENT_DIR)/test/test_list.o
+test_list_exe = $(CURRENT_DIR)/test/test_list
+
+test_list_obj: $(test_list_c)
+	gcc -Wall -$(CXX_FLAG) \
+	-I $(include) \
+	-I $(include)/list \
+	-c $(test_list_c) \
+	-o $(test_list_o)
+
+test_list_exe: test_list_obj
+	gcc -Wall -$(CXX_FLAG) \
+	-o $(test_list_exe) $(test_list_o) \
+	-L$(lib) -llist -lallocator_std
+	rm $(test_list_o)
 # ========================
 ####################################
