@@ -2,11 +2,6 @@
 #define __LIST_TYPE_PRIVATE_H__
 
 /*
- * list node structure declaration
- */
-typedef struct _node_t node_t;
-
-/*
  * list structure definiton
  */
 typedef struct _list_t

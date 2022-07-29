@@ -1,4 +1,5 @@
 #include "list.h"
+#include "list_type_private.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +44,25 @@ void test_list_1()
     list_prt_shead(l, test_list_print);
     list_prt_stail(l, test_list_print);
 
-    printf("%p\n", l->tail->next);
+    //list_clear(l);
+//    list_rmv_head(l);
+//    list_rmv_tail(l);
+    
+    list_rmv_shead(l, d);
+    list_prt_stail(l, test_list_print);
+
+
+    list_swap_objects(l, a, c);
+    list_prt_stail(l, test_list_print);
+
+
+    list_clear(l);
+
+    list_prt_stail(l, test_list_print);
+
+    //printf("%p\n", l->tail->data);
+//    int *bb = (int *)l->tail->prev->next->data;
+//    printf("bb = %d\n", *bb);
     list_delete(l);
 }
 

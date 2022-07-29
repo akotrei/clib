@@ -3,7 +3,6 @@
 
 #include "list_type_public.h"
 #include "interface.h"
-#include "list_type_private.h"
 
 /* function @list_create list creation 
  *
@@ -100,6 +99,16 @@ void* list_fnd_shead(list_t* list, void* obj);
  */
 void* list_fnd_stail(list_t* list, void* obj);
 
+/* function @list_swap_objects object exchange @o1, @o2
+ *
+ * @list    - pointer to list
+ *
+ * @o1      - pointer to object
+ *
+ * @o2      - pointer to obejct 
+ */
+void list_swap_objects(list_t *list, void *o1, void *o2);
+
 /* function to remove all nodes from the list, i.e. the list becomes empty
  *
  * @list    - pointer to list
@@ -115,5 +124,7 @@ void* list_get_tail(list_t* list);
 void* list_get_next(list_t* list);
 
 void* list_get_prev(list_t* list);
+void list_prt_shead(list_t *list, void (*print_fn)(void *o));
+void list_prt_stail(list_t *list, void (*print_fn)(void *o));
 
 #endif /* __LIST_H__ */
