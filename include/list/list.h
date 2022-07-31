@@ -109,22 +109,58 @@ void* list_fnd_stail(list_t* list, void* obj);
  */
 void list_swap_objects(list_t *list, void *o1, void *o2);
 
-/* function to remove all nodes from the list, i.e. the list becomes empty
+/* function @list_clear to remove all nodes from the list, 
+ * i.e. the list becomes empty
  *
  * @list    - pointer to list
  */
 void list_clear(list_t *list);
 
+/* function @list_size returns the size of the list
+ *
+ * @list    - pointer to list
+ */
+int list_size(list_t *list);
 
+/* function @list_get_head returns a pointer to the head of the list
+ *
+ * @list    - pointer to list
+ */
+node_t* list_get_head(list_t* list);
 
-void* list_get_head(list_t* list);
+/* function @list_get_tail returns a pointer to the tail of the list
+ *
+ * @list    - pointer to list
+ */
+node_t* list_get_tail(list_t* list);
 
-void* list_get_tail(list_t* list);
+/* function @list_get_next returns a pointer to the next node of the current node
+ *
+ * @node    - pointer to node
+ */
+node_t* list_get_next(node_t* node);
 
-void* list_get_next(list_t* list);
+/* function @list_get_prev returns a pointer 
+ * to the previous node of the current node
+ *
+ * @node    - pointer to node
+ */
+node_t* list_get_prev(node_t* node);
 
-void* list_get_prev(list_t* list);
+/* function @list_prt_shead prints the list starting from its head
+ *
+ * @list        - pointer to list
+ *
+ * @print_fn    - pointer to the object's print function
+ */
 void list_prt_shead(list_t *list, void (*print_fn)(void *o));
+
+/* function @list_prt_shead prints the list starting from its tail
+ *
+ * @list        - pointer to list
+ *
+ * @print_fn    - pointer to the object's print function
+ */
 void list_prt_stail(list_t *list, void (*print_fn)(void *o));
 
 #endif /* __LIST_H__ */

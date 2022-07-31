@@ -6,6 +6,9 @@
  */
 typedef struct _list_t
 {
+    /* number of nodes in the list*/
+    int list_size;
+
     /* pointer to an allocator interface that allocates and frees memory*/
     iallocator_t *iallocator;
 
