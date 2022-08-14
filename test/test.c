@@ -11,6 +11,15 @@ typedef struct object
     int y;
 } object;
 
+typedef struct worker 
+{
+	double arr[1000000];
+	double arr1[1000000];
+	double arr2[1000000];
+	double arr3[1000000];
+	double arr4[1000000];
+} worker;
+
 void test_container_1();
 void test_container_2();
 void test_container_3();

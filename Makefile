@@ -102,6 +102,25 @@ list_so: list_obj
 ####################################
 
 ####################################
+# array
+array_c  = $(src)/array.c
+array_o  = array.o
+array_so = $(lib)/libarray.so
+
+array_obj: $(array_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-I $(include)/array \
+	-c $(array_c) \
+	-o $(array_o)
+
+array_so: array_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(array_so) $(array_o)
+	rm $(array_o)
+####################################
+
+####################################
 # test
 test_c = $(CURRENT_DIR)/test/test.c
 test_o = $(CURRENT_DIR)/test/test.o
@@ -138,5 +157,25 @@ test_list_exe: test_list_obj
 	-o $(test_list_exe) $(test_list_o) \
 	-L$(lib) -llist -lallocator_std
 	rm $(test_list_o)
+####################################
+
+####################################
+# test_array
+test_array_c = $(CURRENT_DIR)/test/test_array.c
+test_array_o = $(CURRENT_DIR)/test/test_array.o
+test_array_exe = $(CURRENT_DIR)/test/test_array
+
+test_array_obj: $(test_array_c)
+	gcc -Wall -$(CXX_FLAG) \
+	-I $(include) \
+	-I $(include)/array \
+	-c $(test_array_c) \
+	-o $(test_array_o)
+
+test_array_exe: test_array_obj
+	gcc -Wall -$(CXX_FLAG) \
+	-o $(test_array_exe) $(test_array_o) \
+	-L$(lib) -larray -lallocator_std
+	rm $(test_array_o)
 # ========================
 ####################################
