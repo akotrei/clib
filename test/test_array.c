@@ -54,17 +54,21 @@ void test_array_1()
     int elem_size = sizeof(worker);
     array_t *a = array_create(2, alloc_size, elem_size, NULL, test_array_dealloc_fn, NULL, NULL);
 
-	array_push_back(a, b);
+/*	array_push_back(a, b);
 	array_push_back(a, r);
 	array_push_back(a, r);
 	array_push_back(a, r);
 	array_push_front(a, r);
 	array_push_front(a, g);
 	array_push_front(a, g);
-	array_push_front(a, g);
+	array_push_front(a, g);*/
 
-	for(int i = 0; i < 100000000; i++)
+	for(int i = 0; i < 1000; i++)
+	{
 		array_push_back(a, value);
+//		printf("%.lf", value->arr[999]);
+//		printf("%.lf", value->arrr[999999]);
+	}
 
 //    array_add_obj(a, b);
 //    array_add_obj(a, r);
