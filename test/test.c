@@ -29,6 +29,7 @@ int test_tree_cmp_fn(void *obj1, void *obj2);
 int test_tree_cmp_fn_obj(void *obj1, void *obj2);
 void test_tree_1();
 void test_tree_2();
+void test_tree_3();
 void test_tree_delete(void *);
 void print(void *o);
 void* copy_fn(void *o);
