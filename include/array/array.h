@@ -35,12 +35,12 @@
  *
  */
 array_t*
-array_create(int factor,
-             int alloc_size,
+array_create(int alloc_size,
              int elem_size,
              void* (*copy_fn)(void *o),
              void (*dealloc_fn)(void *o),
-             int (*compare_fn)(void *o1, void *o2),
+             int (*compare_fn)(const void *o1, const void *o2),
+             int factor,
              iallocator_t *iallocator);
 
 /* @array_delete array delete function
@@ -86,8 +86,8 @@ array_insert(array_t *a,
  * @index - index of element in array
  */
 void*
-array_fnd_element(array_t *a,
-                  int index);
+array_get_data(array_t *a,
+               int index);
 
 /* @array_get_index function returns the index of the object in the array
  *

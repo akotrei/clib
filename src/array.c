@@ -6,27 +6,37 @@
 #include <string.h>
 #include <stdio.h>
 
-/* function @dealloc_fake 
+/* function @dealloc_fake object removal function @dealloc_fn if equal NULL
  *
  * @o    - pointer to object
  */
-inline static void dealloc_fake(void *o) {};
+inline static void dealloc_fake(void *o) {}
 
-/* function @copy_fake 
+/* function @copy_fake returns pointer to object if @copy_fn is equal NULL
  *
  * @o    - pointer to obejct
  */
-inline static void* copy_fake(void *o) { return o; };
+inline static void* copy_fake(void *o) { return o; }
 
-static void array_increase_capacity(array_t *a, int factor);
+/* @array_increase_capacity function increases the memory for the array by @factor value
+ *
+ * @a      - pointer to array
+ *
+ * @factor - memory increase indicator, that is, the number by which 
+ *           memory for the array will increase
+ */
+static void 
+array_increase_capacity(array_t *a, 
+                        int factor);
 
-array_t *array_create(int factor, 
-                      int alloc_size,
-                      int elem_size,
-                      void* (*copy_fn)(void *o),
-                      void (*dealloc_fn)(void *o),
-                      int (*compare_fn)(void *o1, void *o2),
-                      iallocator_t *iallocator)
+array_t* 
+array_create(int alloc_size,
+             int elem_size,
+             void* (*copy_fn)(void *o),
+             void (*dealloc_fn)(void *o),
+             int (*compare_fn)(const void *o1, const void *o2),
+             int factor,
+             iallocator_t *iallocator)
 {
     /*pointer to allocator interface*/
     iallocator_t *_iallocator;
@@ -88,7 +98,8 @@ array_t *array_create(int factor,
     return a;
 }
 
-void array_delete(array_t *a)
+void 
+array_delete(array_t *a)
 {
     void (*deallocate)(void *self, void *addr) = a->iallocator->deallocate;
     a->dealloc_fn(a->data);
@@ -102,7 +113,9 @@ void array_delete(array_t *a)
     deallocate(NULL, a);
 }
 
-void array_push_back(array_t *a, void *obj)
+void 
+array_push_back(array_t *a, 
+                void *obj)
 {
     if(a->alloc_size == a->logic_size)
     {
@@ -112,63 +125,40 @@ void array_push_back(array_t *a, void *obj)
 	a->logic_size++;
 }
 
-void array_push_front(array_t *a, void *obj)
+void
+array_insert(array_t *a,
+             void *obj,
+             int index,
+             int count)
 {
-    if(a->alloc_size == a->logic_size)
+    if(a->alloc_size - a->logic_size <= count)
     {
-        array_increase_capacity(a, a->factor);
     }
-	int i = a->logic_size * a->elem_size;
-	while(i != 0)
-	{
-		char *pointer_ending_data = (char *)a->data + i - 1;
-		char *pointer_free_store_for_object = (char *)a->data + i + a->elem_size - 1;
-		*pointer_free_store_for_object = *pointer_ending_data;
-		i--;
-	}
-	a->iallocator->copy_data(NULL, (char *)a->data, a->copy_fn(obj), a->elem_size);   
-	a->logic_size++;
 }
 
-void array_insert_obj_by_index(array_t *a, void *obj, int index)
+void*
+array_get_data(array_t *a,
+               int index)
 {
-    if(a->alloc_size == a->logic_size)
-    {
-        array_increase_capacity(a, a->factor);
-    }
-	
+    return (void *)((char *)a->data + index * a->elem_size);
 }
 
-void* array_fnd_obj(array_t *a, void *obj)
+int
+array_get_index(array_t *a,
+                void *obj)
 {
-    char *tmp = (char *)a->data;
-    char *tmp_obj = (char *)obj;
-    while(tmp != tmp_obj)
-    {
-        tmp += a->elem_size;
-    }
-    return tmp;
+    
 }
 
-void* array_rmv_obj(array_t *a, void *obj)
+void*
+array_rmv_element(array_t *a,
+                  int index)
 {
-	return NULL;
 }
 
-void array_print(array_t *a, void (*print_fn)(void *o))
-{
-    char *tmp = (char *)a->data;
-    int i = 0;
-    while(i < a->logic_size)
-    {
-        print_fn((void *)tmp);
-        tmp += a->elem_size;
-        i++;
-    }
-    printf("\n");
-}
-
-static void array_increase_capacity(array_t *a, int factor)
+static void 
+array_increase_capacity(array_t *a, 
+                        int factor)
 {
     a->alloc_size *= factor;
     a->data = a->iallocator->reallocate(NULL, a->data, a->alloc_size * a->elem_size);

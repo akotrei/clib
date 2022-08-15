@@ -6,10 +6,13 @@
  */
 typedef struct _array_t 
 {
-	/*
-	 *
-     */
 	
+    /* if user passes iallocator equals NULL than array creates internal
+     * allocator_std and is owner of this allocator and responsible
+     * for deleting this allocator @iallocator_owner equals 1 when
+     * array is owner else 0
+     */
+    int iallocator_owner;	
 
     /* a variable that is responsible for increasing 
      * the memory for the array when there is not enough of it
@@ -48,7 +51,7 @@ typedef struct _array_t
     /* 
      * pointer to a function for comparing objects in the array or outside it
      */
-    int (*compare_fn)(void *o1, void *o2);
+    int (*compare_fn)(const void *o1, const void *o2);
 
     /*
      * pointer to an allocator interface that implements the functions 
