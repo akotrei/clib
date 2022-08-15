@@ -67,6 +67,7 @@ array_t *array_create(int factor,
                                                   sizeof(array_t));
 
     a->factor = factor;
+    a->iallocator_owner = _iallocator_owner;
     a->iallocator = _iallocator;
     a->alloc_size = alloc_size;
     a->logic_size = 0;
@@ -90,16 +91,28 @@ array_t *array_create(int factor,
 
 void array_delete(array_t *a)
 {
-    void (*deallocate)(void *self, void *addr) = a->iallocator->deallocate;
-    a->dealloc_fn(a->data);
-    //if(a->iallocator_owner == 1)
-    //{
-        /*allocator removal*/
-        allocator_std_delete(a->iallocator->self);
-    //}
+    int elem_size = a->elem_size;
+    char* data = (char*)a->data;
+    void (*dealloc_fn)(void*) = a->dealloc_fn;
+    iallocator_t* iallocator = a->iallocator;
 
-    /*deleting a list*/
-    deallocate(NULL, a);
+    for (int i = 0; i < a->logic_size; i++)
+    {
+        void* obj = data + i * elem_size;
+        dealloc_fn(obj);
+    }
+
+    iallocator->deallocate(NULL, data);
+
+    if (a->iallocator_owner == 1)
+    {
+        iallocator->deallocate(NULL, a);
+        allocator_std_delete(iallocator->self);
+    }
+    else
+    {
+        iallocator->deallocate(NULL, a);
+    }
 }
 
 void array_push_back(array_t *a, void *obj)

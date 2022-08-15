@@ -6,15 +6,12 @@
  */
 typedef struct _array_t 
 {
-	/*
-	 *
-     */
-	
-
     /* a variable that is responsible for increasing 
      * the memory for the array when there is not enough of it
      */
     int factor;
+    
+    int iallocator_owner;
 
     /* the amount of memory to be used by the array
      */
