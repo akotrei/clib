@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 typedef struct object
 {
@@ -11,30 +12,25 @@ typedef struct object
     int y;
 } object;
 
-typedef struct worker 
-{
-	int id;
-	char *first_name;
-	char *name;
-	char *surname;
-	int sex;
-	int age;
-	double efficiency;
-	double arr[1000];
-	double arrr[1000000];
-} worker;
-
 void test_array_1();
 void test_array_print(void *o);
 void test_array_print(void *o)
 {
-    int *a = (int *)o;
-    printf("%d", *a);
+    object *a = (object *)o;
+    printf("(%d, %d)\n", a->x, a->y);
 }
 void test_array_dealloc_fn(void *o)
 {
 	int *a = (int *)o;
     free(a);
+}
+int cmp(const void *o1, const void *o2)
+{
+    int *o_1 = (int *)o1;
+    int *o_2 = (int *)o2;
+    if(*o_1 == *o_2)
+        return 0;
+    return -1;
 }
 
 int main(int argc, char **args)
@@ -45,41 +41,43 @@ int main(int argc, char **args)
 
 void test_array_1()
 {
-    int *b = malloc(sizeof(int)); *b = 1;
-    int *r = malloc(sizeof(int)); *r = 2;
-    int *g = malloc(sizeof(int)); *g = 6;
-	worker *value = malloc(sizeof(worker));
-	printf("%ld\n", sizeof(worker));
+    object *obj = malloc(10 * sizeof(object));
+    obj[0].x = 4;
+    obj[0].y = 3;
+    obj[1].x = 1;
+    obj[1].y = 8;
+    obj[2].x = 2;
+    obj[2].y = 6;
+    obj[5].x = 123;
+    obj[5].y = 15;
+    obj[6].x = 45;
+    obj[6].y = 189;
+
+    object *o = malloc(sizeof(object));
+    o->x = 11;
+    o->y = 12;
+
     int alloc_size = 1;
-    int elem_size = sizeof(worker);
-    array_t *a = array_create(2, alloc_size, elem_size, NULL, test_array_dealloc_fn, NULL, NULL);
+    int elem_size = sizeof(object);
 
-/*	array_push_back(a, b);
-	array_push_back(a, r);
-	array_push_back(a, r);
-	array_push_back(a, r);
-	array_push_front(a, r);
-	array_push_front(a, g);
-	array_push_front(a, g);
-	array_push_front(a, g);*/
+    array_t *a = array_create(alloc_size, elem_size, NULL, test_array_dealloc_fn, cmp, 2, NULL);
 
-	for(int i = 0; i < 1000; i++)
-	{
-		array_push_back(a, value);
-//		printf("%.lf", value->arr[999]);
-//		printf("%.lf", value->arrr[999999]);
-	}
+    array_insert(a, (void *)&obj[0], 0, 3);
+    array_push_back(a, &obj[1]);
+    array_push_back(a, o);
+    printf("obj: %p, a->data: %p\n", obj, *(object **)a->data);
 
-//    array_add_obj(a, b);
-//    array_add_obj(a, r);
-//    int *l = (int *)array_fnd_obj(a, r);
-/*    void *c = (void *)a->data;
-    int *k = (int *)c;
-    printf("%d\n", *k);*/
-//    array_print(a, test_array_print);
+    object *c = *(object **)array_get_data(a, 0);
+    printf("%p, %p\n", c, obj[0]);
 
-    array_delete(a);
-	free(b);
-	free(r);
-	free(g);
+    printf("index: %d\n",array_get_index(a, o));
+    array_rmv_element(a, 0);
+
+    array_insert(a, (void *)&obj[5], 2, 2);
+
+    array_rmv_element(a, 2);
+
+    array_print(a, test_array_print);
+
+    //array_delete(a);
 }

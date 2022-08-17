@@ -9,6 +9,7 @@
  * @factor     - the value by which the size of the array memory will be increased
  *               note: the variable must be > 1 otherwise the memory for
  *               the array will not increase
+ *               note: if this parameter is equal 0 then @factor will be equal 2
  *
  * @alloc_size - memory allocated for working with an array
  *               note: variable must be > 0 to work with array
@@ -101,8 +102,7 @@ int
 array_get_index(array_t *a,
                 void *obj);
 
-/* @array_rmv_element function to remove an element from an array by index and return 
- * a pointer to the object being removed
+/* @array_rmv_element function to remove an element from an array by index 
  *
  * @a     - pointer to array
  *
@@ -110,11 +110,11 @@ array_get_index(array_t *a,
  *
  * @index - index of element in array
  */
-void*
+void
 array_rmv_element(array_t *a,
                   int index);
 
-/* @array_qsort array sort function
+/* @array_factor function changes the memory allocation rate for an array
  *
  * @a     - pointer to array
  *
@@ -123,7 +123,15 @@ array_rmv_element(array_t *a,
  * @index - index of element in array
  */
 void 
-array_qsort(array_t *a);
+array_factor(array_t *a,
+             int factor);
+
+/* @array_size function returns the size of the array
+ *
+ * @a - pointer to array
+ */
+int 
+array_size(array_t *a);
 
 /* @array_print function to print an array to the console
  *
