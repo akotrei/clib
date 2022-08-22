@@ -247,7 +247,23 @@ void* list_rmv_head(list_t* list)
 {
     /*pointer to the data in the node to be removed*/
     void *data_of_deleting_node = list->head->data;
-   
+
+    /*if list just have a head of the list*/
+    if(list->head->next == NULL && list->head->prev == NULL)
+    {
+        /*removing the head of the list*/
+        list->iallocator->deallocate(NULL, list->head);
+
+        /*tail of the list is NULL*/
+        list->head = NULL;
+
+        /*decreasing the size of the list when deleting a node*/ 
+        list->list_size--;
+
+        /*returning data from the node being deleted*/
+        return data_of_deleting_node;
+    }
+
     /*now the next node in the list after the head becomes the head*/
     list->head = list->head->next;
 
@@ -272,6 +288,23 @@ void* list_rmv_tail(list_t* list)
 {
     /*pointer to the data in the node to be removed*/
     void *data_of_deleting_node = list->tail->data;
+
+    /*if list just have a tail of the list*/
+    if(list->tail->next == NULL && list->tail->prev == NULL)
+    {
+        /*removing the tail of the list*/
+        list->iallocator->deallocate(NULL, list->tail);
+
+        /*tail of the list is NULL*/
+        list->tail = NULL;
+
+        /*decreasing the size of the list when deleting a node*/ 
+        list->list_size--;
+
+        /*returning data from the node being deleted*/
+        return data_of_deleting_node;
+    }
+
 
     /*now the tail pointer points to the penultimate node of the list*/
     list->tail = list->tail->prev;
@@ -307,24 +340,25 @@ void* list_rmv_shead(list_t* list, void* obj)
          * to the data passed to the function, then delete the node*/
         if(list->compare_fn(tmp->data, obj) == 0)
         {
+            /*when there is only one element in the list*/
+            if(tmp->prev == NULL && tmp->next == NULL)
+            {
+                /*returning data from the node being deleted*/
+                return list_rmv_head(list);
+            }
+
             /*when found node is head*/
             if(tmp->prev == NULL && tmp->next != NULL)
             {
-                /*remove the head and get data from it*/
-                void *data_of_deleting_node = list_rmv_head(list);
-
                 /*returning data from the node being deleted*/
-                return data_of_deleting_node;
+                return list_rmv_head(list);
             }
 
             /*when found node is tail*/
             if(tmp->prev != NULL && tmp->next == NULL)
             {
-                /*remove the tail and get data from it*/
-                void *data_of_deleting_node = list_rmv_tail(list);
-
                 /*returning data from the node being deleted*/
-                return data_of_deleting_node;
+                return list_rmv_tail(list);
             }
 
             /*when the node is between the head and tail of the list*/
@@ -378,24 +412,25 @@ void* list_rmv_stail(list_t* list, void* obj)
          * to the data passed to the function, then delete the node*/
         if(list->compare_fn(tmp->data, obj) == 0)
         {
+            /*when there is only one element in the list*/
+            if(tmp->prev == NULL && tmp->next == NULL)
+            {
+                /*returning data from the node being deleted*/
+                return list_rmv_head(list);
+            }
+
             /*when found node is head*/
             if(tmp->prev == NULL && tmp->next != NULL)
             {
-                /*remove the head and get data from it*/
-                void *data_of_deleting_node = list_rmv_head(list);
-
                 /*returning data from the node being deleted*/
-                return data_of_deleting_node;
+                return list_rmv_head(list);
             }
 
             /*when found node is tail*/
             if(tmp->prev != NULL && tmp->next == NULL)
             {
-                /*remove the tail and get data from it*/
-                void *data_of_deleting_node = list_rmv_tail(list);
-
                 /*returning data from the node being deleted*/
-                return data_of_deleting_node;
+                return list_rmv_tail(list);
             }
 
             /*when the node is between the head and tail of the list*/
@@ -532,6 +567,9 @@ void list_clear(list_t *list)
     {
         /*another pointer to the current node*/
         node_t *tmp = node;
+
+        /*deleting a data from node*/
+        list->dealloc_fn(tmp->data);
 
         /*move to the next node in the list*/
         node = node->next;

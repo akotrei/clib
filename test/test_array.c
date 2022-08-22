@@ -65,7 +65,7 @@ void test_array_1()
     array_insert(a, (void *)&obj[0], 0, 3);
     array_push_back(a, &obj[1]);
     array_push_back(a, o);
-    printf("obj: %p, a->data: %p\n", obj, *(object **)a->data);
+    printf("obj: %p, a->data: %p\n", &obj[0], (char **)a->data);
 
     object *c = *(object **)array_get_data(a, 0);
     printf("%p, %p\n", c, obj[0]);
@@ -74,8 +74,13 @@ void test_array_1()
     array_rmv_element(a, 0);
 
     array_insert(a, (void *)&obj[5], 2, 2);
+    array_push_back(a, &o);
+
+    printf("obj: %p, a->data: %p\n", o, *(object **)array_get_data(a, array_get_index(a, &o)));
 
     array_rmv_element(a, 2);
+
+    printf("size of array: %d\n", array_size(a));
 
     array_print(a, test_array_print);
 

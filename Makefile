@@ -121,6 +121,27 @@ array_so: array_obj
 ####################################
 
 ####################################
+# hash_table
+hash_table_c  = $(src)/hash_table.c
+hash_table_o  = hash_table.o
+hash_table_so = $(lib)/libhash_table.so
+
+hash_table_obj: $(hash_table_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-I $(include)/hash_table \
+	-I $(include)/list \
+	-I $(include)/array \
+	-c $(hash_table_c) \
+	-o $(hash_table_o) 
+
+hash_table_so: hash_table_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(hash_table_so) $(hash_table_o)
+	rm $(hash_table_o)
+####################################
+
+####################################
 # test
 test_c = $(CURRENT_DIR)/test/test.c
 test_o = $(CURRENT_DIR)/test/test.o
@@ -157,6 +178,27 @@ test_list_exe: test_list_obj
 	-o $(test_list_exe) $(test_list_o) \
 	-L$(lib) -llist -lallocator_std
 	rm $(test_list_o)
+####################################
+
+####################################
+# test_hash_table
+test_hash_table_c = $(CURRENT_DIR)/test/test_hash_table.c
+test_hash_table_o = $(CURRENT_DIR)/test/test_hash_table.o
+test_hash_table_exe = $(CURRENT_DIR)/test/test_hash_table
+
+test_hash_table_obj: $(test_hash_table_c)
+	gcc -Wall -$(CXX_FLAG) \
+	-I $(include) \
+	-I $(include)/hash_table \
+	-I $(include)/array \
+	-c $(test_hash_table_c) \
+	-o $(test_hash_table_o)
+
+test_hash_table_exe: test_hash_table_obj
+	gcc -Wall -$(CXX_FLAG) \
+	-o $(test_hash_table_exe) $(test_hash_table_o) \
+	-L$(lib) -lhash_table -lallocator_std -larray -llist
+	rm $(test_hash_table_o)
 ####################################
 
 ####################################
