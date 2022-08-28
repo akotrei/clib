@@ -1,70 +1,12 @@
-#include "tree.h"
+#include "binary_search_tree.h"
 #include "allocator_std.h"
+#include "binary_search_tree_type_private.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
 #include <math.h>                                                              
-
-/*
- * knot type @knot_t declaration
- */
-typedef struct _knot_t knot_t;
-
-/*
- * definition @_knot_t type 
- */
-typedef struct _knot_t
-{
-    /* pointer to the user object that is in the tree knot */
-    void* data;   
-
-    /* pointer to left subtree */
-    knot_t* left;   
-
-    /* pointer to right subtree */
-    knot_t* right;
-
-    /* pointer to previous knot */
-    knot_t* parent;
-
-} _knot_t;
-
-/*
- * definition @_tree_t type of the tree
- */
-typedef struct _tree_t
-{  
-    /*
-     * pointer to iallocator interface that is responsible
-     * for allocating and deallocating internal data in tree when user modifies
-     * a tree
-     */ 
-    iallocator_t* iallocator;        
-    
-    /* if user passes iallocator equals NULL than tree creates internal 
-     * allocator_std and is owner of this allocator and responsible 
-     * for deleting this allocator @iallocator_owner equals 1 when 
-     * tree is owner else 0
-     */
-    int iallocator_owner;
-    
-    /* pointer to a function that compares two objects are
-     * passed to it and returns the result. For a more
-     * detailed description of the function, go to the file tree.h
-     */
-    int (*compare_fn)(void *o1, void *o2);
-
-    /* pointer to a function that copies the user object to the tree knot */
-    void* (*copy_fn)(void *o);   
-
-    /* pointer to a function that removes the user object from the tree */
-    void (*dealloc_fn)(void *o);
-
-    /* pointer to the root of the tree */
-    knot_t* knot;        
-} _tree_t;
 
 /*
  * knot creation function @knot_create that returns a pointer to the created knot
@@ -75,7 +17,10 @@ typedef struct _tree_t
  *
  * @parent                 - pointer to previous knot
  */
-static knot_t* knot_create(void *data, iallocator_t *interface_allocator, knot_t *parent);
+static knot_t* 
+knot_create(void *data, 
+            iallocator_t *interface_allocator, 
+            knot_t *parent);
 
 /*
  * a function @tree_delete_all_knots to delete all knots 
@@ -87,27 +32,41 @@ static knot_t* knot_create(void *data, iallocator_t *interface_allocator, knot_t
  *
  * @dealloc_fn    - pointer to a user object delete function 
  */
-static void tree_delete_all_knots(knot_t **knot, void (*dealloc_fn)(void *o), void (*deallocate)(void *self, void *address));
+static void 
+tree_delete_all_knots(knot_t **knot, 
+                      void (*dealloc_fn)(void *o), 
+                      void (*deallocate)(void *self, void *address));
 
 /*
- * a function @copy_fake that returns a pointer to the user object
+ * a function @copy_fake that returns a pointer to the user object if @copy_fn 
+ * is equal NULL
  *
  * @o    - pointer to user object 
  */
-static void* copy_fake(void *o);
+static void* copy_fake(void *o) { return o; }
 
-static void dealloc_fake(void *o) {};
-
-/*
- * 
+/* a function that does not delete anything if @dealloc_fn is NULL
+ *
+ * @o    - pointer to user object
  */
-static void knot_print(knot_t *knot, void (*print_fn)(void *o), int level);
+static void dealloc_fake(void *o) {}
+
+static void 
+knot_print(knot_t *knot, 
+           void (*print_fn)(void *o), 
+           int level);
 
 /*
  * function @tree_create creates a tree and returns a pointer to it
  */
-tree_t* tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void *o), void (*dealloc_fn)(void *o), iallocator_t *interface_allocator)
+tree_t* 
+tree_create(int (*compare_fn)(void *o1, void *o2), 
+            void* (*copy_fn)(void *o), 
+            void (*dealloc_fn)(void *o), 
+            iallocator_t *interface_allocator)
 {
+    assert(compare_fn == NULL && "@compare_fn mustn't be NULL");
+
     /*pointer to allocator interface*/
     iallocator_t *_iallocator;
 
@@ -145,8 +104,6 @@ tree_t* tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void
     /*tree structure field assignment*/
     t->iallocator = _iallocator;
     t->iallocator_owner = _iallocator_owner;
-
-    assert(compare_fn != NULL && "@compare_fn mustn't be NULL");
     t->compare_fn = compare_fn;
 
     t->knot = NULL;
@@ -168,7 +125,8 @@ tree_t* tree_create(int (*compare_fn)(void *o1, void *o2), void* (*copy_fn)(void
 /*
  * function @tree_delete removes the tree
  */
-void tree_delete(tree_t *t)
+void 
+tree_delete(tree_t *t)
 {
     /*pointer to a function that removes the tree itself*/
     void (*deallocate)(void *self, 
@@ -193,6 +151,8 @@ void tree_delete(tree_t *t)
  */
 void tree_add_object(tree_t *t, void *o)
 {
+    assert(t->compare_fn == NULL && "@compare_fn mustn't be NULL");
+
     /*pointer to pointer to tree root*/
     knot_t **knot = &t->knot;
 
@@ -206,13 +166,6 @@ void tree_add_object(tree_t *t, void *o)
          * this is necessary in order to save this pointer in the created knot*/
         tmp_parent = *knot;
 
-        /*if the objects are equal then exit the function*/
-        if (t->compare_fn((*knot)->data, o) == 0)
-        {
-            /*function exit*/
-            return;
-        }
-
         /*if the object being added is less than the current one, 
          * go to the left subtree*/
         if (t->compare_fn((*knot)->data, o) < 0)
@@ -222,11 +175,18 @@ void tree_add_object(tree_t *t, void *o)
         }
         /*if the object being added is greater than the current one, 
          * go to the right subtree*/
-        else
+        else if(t->compare_fn((*knot)->data, o) > 0)
         {
             /*move to right subtree*/
             knot = &(*knot)->right;
         }
+        /*if the objects are equal then exit the function*/
+        else if(t->compare_fn((*knot)->data, o) == 0)
+        {
+            /*function exit*/
+            return;
+        }
+
     }
 
     /*created knot*/
@@ -245,8 +205,12 @@ void tree_add_object(tree_t *t, void *o)
  * function @tree_fnd_object finds an object in the tree and 
  * returns a pointer to this object
  */
-void* tree_fnd_object(tree_t *t, void *o)
+void* 
+tree_fnd_object(tree_t *t, 
+                void *o)
 {
+    assert(t->compare_fn == NULL && "@compare_fn mustn't be NULL");
+
     /*pointer to pointer to tree root*/
     knot_t **knot = &t->knot;
 
@@ -282,8 +246,12 @@ void* tree_fnd_object(tree_t *t, void *o)
 /*
  * function @tree_rmv_object to remove an object from the tree
  */
-void* tree_rmv_object(tree_t *t, void *o)
+void* 
+tree_rmv_object(tree_t *t, 
+                void *o)
 {
+    assert(t->compare_fn == NULL && "@compare_fn mustn't be NULL");
+
     /*pointer to pointer to tree root*/
     knot_t **knot = &t->knot;
 
@@ -459,7 +427,9 @@ void* tree_rmv_object(tree_t *t, void *o)
     return NULL;
 }
 
-void tree_print(tree_t *t, void (*print_fn)(void *o))
+void 
+tree_print(tree_t *t, 
+           void (*print_fn)(void *o))
 {
     if(t != NULL)
         knot_print(t->knot, print_fn, 0);
@@ -468,9 +438,10 @@ void tree_print(tree_t *t, void (*print_fn)(void *o))
 /*
  * function @knot_create creates a knot and returns a pointer to the created knot
  */
-static knot_t *knot_create(void *data, 
-                           iallocator_t *iallocator, 
-                           knot_t *parent)
+static knot_t* 
+knot_create(void *data, 
+            iallocator_t *iallocator, 
+            knot_t *parent)
 {
     /*creating a pointer to the knot to be returned*/
     knot_t *knot = (knot_t *)iallocator->allocate(iallocator, 
@@ -486,8 +457,10 @@ static knot_t *knot_create(void *data,
     return knot;
 }
 
-/**/
-static void knot_print(knot_t *knot, void (*print_fn)(void *o), int level)
+static void 
+knot_print(knot_t *knot, 
+           void (*print_fn)(void *o), 
+           int level)
 {
     if(knot != NULL)
     {
@@ -509,9 +482,10 @@ static void knot_print(knot_t *knot, void (*print_fn)(void *o), int level)
 /*
  * function @tree_delete_all_knots to delete all knots in the tree using recursion
  */
-static void tree_delete_all_knots(knot_t **knot, 
-                                  void (*dealloc_fn)(void *o), 
-                                  void (*deallocate)(void *self, void *address))
+static void 
+tree_delete_all_knots(knot_t **knot, 
+                      void (*dealloc_fn)(void *o), 
+                      void (*deallocate)(void *self, void *address))
 {
     /*while the pointer points to an existing knot in the tree*/
     if(*knot != NULL)
@@ -531,23 +505,23 @@ static void tree_delete_all_knots(knot_t **knot,
 }
 
 /*
- * function @copy_fake returns a pointer to an object
- */
-static void *copy_fake(void *o) 
-{ 
-    /*returning a pointer to an object*/
-    return o; 
-}
-
-/*
  * function @bst_to_vine convert tree to right singly linked list
  */
-static int bst_to_vine(knot_t *grand)
+static int 
+bst_to_vine(knot_t *grand)
 {
     int count = 0;
+
+    /* make tmp pointer to traverse
+     * and right flatten the given BST*/
     knot_t *tmp = grand->right;
+
+    /* traverse until tmp becomes NULL*/
     while(tmp != NULL)
     {
+        /* if left exist for node
+         * pointed by tmp then
+         * right rotate it */
         if(tmp->left != NULL)
         {
             knot_t *oldtmp = tmp;
@@ -556,6 +530,10 @@ static int bst_to_vine(knot_t *grand)
             tmp->right = oldtmp;
             grand->right = tmp;
         }
+        /* if left dont exists
+         * add 1 to count and
+         * traverse further right to
+         * flatten remaining BST */
         else 
         {
             count++;
@@ -566,9 +544,19 @@ static int bst_to_vine(knot_t *grand)
     return count;
 }
 
-static void compress(knot_t *grand, int m)
+/* Function to compress given tree
+ * with its root as grand->right.
+ */
+static void 
+compress(knot_t *grand, 
+         int m)
 {
+    /* make tmp pointer to traverse
+     * and right flatten the given BST*/
     knot_t *tmp = grand->right;
+
+    /* Traverse and left-rotate root m times
+     * to compress given vine form of BST */
     for(int i = 0; i < m; i++)
     {
         knot_t *oldtmp = tmp;
@@ -581,22 +569,48 @@ static void compress(knot_t *grand, int m)
     }
 }
 
-static knot_t* tree_balance(tree_t *t)
+/* function to implement the algorithm*/
+static knot_t* 
+tree_balance(tree_t *t)
 {
+    /* create dummy node*/
     knot_t *grand = knot_create(NULL, t->iallocator, NULL); 
+
+    /* assign the right of dummy node as our input BST*/
     grand->right = t->knot;
+
+    /* get the number of nodes in input BST and
+     * simultaneously convert it into right linked list.*/
     int count = bst_to_vine(grand);
+
+    /* gets the height of tree in which all levels
+     * are completely filled.*/
     int h = log2((double)(count + 1));
+
+    /* get number of nodes until second last level*/
     int m = pow(2, h) - 1;
+
+    /* left rotate for excess nodes at last level*/
     compress(grand, count - m);
+
+    /* left rotation till m becomes 0
+     * step is done as mentioned in algo to
+     * make BST balanced */
     for(m = m / 2; m > 0; m /= 2)
         compress(grand, m);
+
     knot_t *result = grand->right;
+
+    /* deleting the created temporary node*/
     t->iallocator->deallocate(NULL, grand);
+
+    /* return the balanced tree*/
     return result;
 }
 
-void tree_balance_DSW(tree_t *t) 
-{ 
+void 
+tree_balance_DSW(tree_t *t) 
+{
+    /* calling function balancing of the tree using DSW algorithm*/
     t->knot = (knot_t *)tree_balance(t); 
 }
