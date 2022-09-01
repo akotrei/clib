@@ -4,6 +4,17 @@
 #include "list_type_public.h"
 #include "interface.h"
 
+/* DESCRIPTION
+ * A doubly linked list is a set of nodes, each of which has access to the next node 
+ * and the previous one. The list contains pointers to the head and tail of the list, 
+ * that is, pointers to the last node and the first. The basic operations on a list 
+ * are deleting, searching, adding a head node, a tail node, or starting from its head 
+ * or tail. A doubly linked list is a fairly versatile data structure, as it can be 
+ * used where it is not known how much memory needs to be allocated. Also, the 
+ * operations of deleting, searching, and adding the tail and head of the list are 
+ * very fast, since the pointer to these nodes is stored in the list itself.
+ */
+
 /* function @list_create list creation 
  *
  * @copy_fn       - pointer to a function that copies an object to a list node, 
