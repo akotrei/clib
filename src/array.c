@@ -252,6 +252,7 @@ array_rmv_element(array_t *a,
     else 
     {
         char *tmp = (char *)a->data + index * a->elem_size;
+        a->dealloc_fn(tmp);
         char *tmp1 = (char *)a->data + (index + 1) * a->elem_size;
 
         while(tmp1 != (char *)a->data + a->logic_size * a->elem_size)

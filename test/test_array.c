@@ -62,7 +62,8 @@ void test_array_1()
 
     array_t *a = array_create(alloc_size, elem_size, NULL, test_array_dealloc_fn, cmp, 2, NULL);
 
-    array_insert(a, (void *)&obj[0], 0, 3);
+    array_push_back(a, o);
+/*    array_insert(a, (void *)&obj[0], 0, 3);
     array_push_back(a, &obj[1]);
     array_push_back(a, o);
     printf("obj: %p, a->data: %p\n", obj, *(object **)a->data);
@@ -79,5 +80,5 @@ void test_array_1()
 
     array_print(a, test_array_print);
 
-    //array_delete(a);
+    array_delete(a);*/
 }
