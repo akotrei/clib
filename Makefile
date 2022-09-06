@@ -29,22 +29,22 @@ container_so: container_obj
 ####################################
 
 ####################################
-# binary_search_tree
-binary_search_tree_c 	= $(src)/binary_search_tree.c
-binary_search_tree_o 	= binary_search_tree.o
-binary_search_tree_so 	= $(lib)/libbinary_search_tree.so
+# tree
+tree_c 	= $(src)/tree.c
+tree_o 	= tree.o
+tree_so = $(lib)/libtree.so
 
-binary_search_tree_obj: $(binary_search_tree_c)
+tree_obj: $(tree_c)
 	gcc -Wall -$(CXX_FLAG) -fPIC \
 	-I $(include) \
-	-I $(include)/binary_search_tree \
-	-c $(binary_search_tree_c) \
-	-o $(binary_search_tree_o)
+	-I $(include)/tree \
+	-c $(tree_c) \
+	-o $(tree_o)
 
-binary_search_tree_so: binary_search_tree_obj
+tree_so: tree_obj
 	gcc -Wall -$(CXX_FLAG) -shared \
-	-o $(binary_search_tree_so) $(binary_search_tree_o)
-	rm $(binary_search_tree_o)
+	-o $(tree_so) $(tree_o)
+	rm $(tree_o)
 ####################################
 
 ####################################
@@ -63,6 +63,25 @@ allocator_std_so: allocator_std_obj
 	gcc -Wall -$(CXX_FLAG) -shared \
 	-o $(allocator_std_so) $(allocator_std_o)
 	rm $(allocator_std_o)
+####################################
+
+####################################
+# tree_iterator
+tree_iterator_c 	= $(src)/tree_iterator.c
+tree_iterator_o 	= tree_iterator.o
+tree_iterator_so 	= $(lib)/libtree_iterator.so
+
+tree_iterator_obj: $(tree_iterator_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-I $(include)/tree \
+	-c $(tree_iterator_c) \
+	-o $(tree_iterator_o)
+
+tree_iterator_so: tree_iterator_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(tree_iterator_so) $(tree_iterator_o)
+	rm $(tree_iterator_o)
 ####################################
 
 ####################################
@@ -102,23 +121,23 @@ list_so: list_obj
 ####################################
 
 ####################################
-# test_binary_search_tree
-test_binary_search_tree_c = $(CURRENT_DIR)/test/test_binary_search_tree.c
-test_binary_search_tree_o = $(CURRENT_DIR)/test/test_binary_search_tree.o
-test_binary_search_tree_exe = $(CURRENT_DIR)/test/test_binary_search_tree
+# test_tree
+test_tree_c = $(CURRENT_DIR)/test/test_tree.c
+test_tree_o = $(CURRENT_DIR)/test/test_tree.o
+test_tree_exe = $(CURRENT_DIR)/test/test_tree
 
-test_binary_search_tree_obj: $(test_binary_search_tree_c)
+test_tree_obj: $(test_tree_c)
 	gcc -Wall -$(CXX_FLAG) \
 	-I $(include) \
-	-I $(include)/binary_search_tree \
-	-c $(test_binary_search_tree_c) \
-	-o $(test_binary_search_tree_o)
+	-I $(include)/tree \
+	-c $(test_tree_c) \
+	-o $(test_tree_o)
 
-test_binary_search_tree_exe: test_binary_search_tree_obj
+test_tree_exe: test_tree_obj
 	gcc -Wall -$(CXX_FLAG) \
-	-o $(test_binary_search_tree_exe) $(test_binary_search_tree_o) \
-	-L$(lib) -lbinary_search_tree -lallocator_std -lm
-	rm $(test_binary_search_tree_o)
+	-o $(test_tree_exe) $(test_tree_o) \
+	-L$(lib) -ltree -lallocator_std -lm -ltree_iterator
+	rm $(test_tree_o)
 ####################################
 
 ####################################
