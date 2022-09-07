@@ -102,6 +102,25 @@ list_so: list_obj
 ####################################
 
 ####################################
+# list_iterator
+list_iterator_c 	= $(src)/list_iterator.c
+list_iterator_o 	= list_iterator.o
+list_iterator_so 	= $(lib)/liblist_iterator.so
+
+list_iterator_obj: $(list_iterator_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-I $(include)/list \
+	-c $(list_iterator_c) \
+	-o $(list_iterator_o)
+
+list_iterator_so: list_iterator_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(list_iterator_so) $(list_iterator_o)
+	rm $(list_iterator_o)
+####################################
+
+####################################
 # test
 test_c = $(CURRENT_DIR)/test/test.c
 test_o = $(CURRENT_DIR)/test/test.o
@@ -136,7 +155,7 @@ test_list_obj: $(test_list_c)
 test_list_exe: test_list_obj
 	gcc -Wall -$(CXX_FLAG) \
 	-o $(test_list_exe) $(test_list_o) \
-	-L$(lib) -llist -lallocator_std
+	-L$(lib) -llist -lallocator_std -llist_iterator
 	rm $(test_list_o)
 # ========================
 ####################################

@@ -1,5 +1,7 @@
 #include "list.h"
 #include "list_type_private.h"
+#include "list_iterator.h"
+#include "allocator_std.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +32,7 @@ int main(int argc, char **args)
     test_1() == 0 ? printf("TEST 1 HAS BEEN PASSED\n") : printf("TEST 1 HASN'T BEEN PASSED\n");
     printf("====================================================================================================================================\n\n");
 
-    printf("============================================================== TEST 2 ==============================================================\n");
+    /*printf("============================================================== TEST 2 ==============================================================\n");
     printf("SCRIPT DESCRIPTION\n");
     printf("Testing the functions of creating and deleting a list, adding an object to a list,\n");
     printf("copying an object, deleting an object, and the object comparison function\n\n");
@@ -45,7 +47,7 @@ int main(int argc, char **args)
     printf("nodes of the list, getting the size of the list and deleting all nodes in\n");
     printf("the list (make the list empty) .\n\n");
     test_3() == 0 ? printf("TEST 3 HAS BEEN PASSED\n") : printf("TEST 3 HASN'T BEEN PASSED\n");
-    printf("====================================================================================================================================\n\n");
+    printf("====================================================================================================================================\n\n");*/
     return 0;
 }
 
@@ -80,53 +82,79 @@ void print_obj_fn(void *o)
 
 int test_1()
 {
-    list_t *general_list = list_create(NULL, NULL, NULL, NULL);
-    list_t *secondary_list = list_create(NULL, NULL, NULL, NULL);
+    char mem[sizeof(iallocator_t)];
+    iallocator_t *iallocator = allocator_std_new(mem);
 
-    list_add_tail(general_list, &secondary_list);
+    char iter_mem[sizeof(ilist_iterator_t)];
+    ilist_iterator_t *ilist_iterator = list_iterator_create(iter_mem);
 
-    object *o1 = (object *)malloc(sizeof(object));
-    o1->color = (char *)malloc(3 * sizeof(char)); 
+    list_t *l = list_create(iallocator->allocate(NULL, list_sizeof()),
+                            NULL,
+                            NULL,
+                            NULL,
+                            iallocator);
+
+    object *o = malloc(sizeof(object));
+    o->x = 5;
+    o->y = 3;
+    o->color = malloc(4 * sizeof(char));
+    o->color[0] = 'r';
+    o->color[1] = 'e';
+    o->color[2] = 'd';
+    o->color[3] = '\0';
+
+    object *o1 = malloc(sizeof(object));
+    o1->x = 21;
+    o1->y = 34;
+    o1->color = malloc(4 * sizeof(char));
     o1->color[0] = 'r';
     o1->color[1] = 'e';
     o1->color[2] = 'd';
-    o1->x = 3;
-    o1->y = 5;
+    o1->color[3] = '\0';
 
-    list_add_tail(secondary_list, &o1);
+    list_add_head(l, o);
+    list_add_tail(l, o1);
+    print_obj_fn(l->head->next->data);
+    printf("\nlist size: %d\n", list_size(l));
+    //list_clear(l);
+    printf("\nlist size: %d\n", list_size(l));
 
-    printf("address of data pointer in head of the general list: [%p], address of pointer adding secondary list: [%p]\n", general_list->head->data, &secondary_list);
-    printf("address of data in head of the general list: [%p], address of adding secondary list: [%p]\n\n", *(list_t **)general_list->head->data, secondary_list);
+    printf("%p\n", l->head->data);
+    ilist_iterator->next(l);
+    ilist_iterator->prev(l);
+    ilist_iterator->begin(l);
 
-    printf("address of data pointer in head of the secondary list: [%p], address of pointer adding object to the secondary list: [%p]\n", secondary_list->head->data, &o1);
-    printf("address of data in head of the secondary list: [%p], address of adding object to the secondary list: [%p]\n\n", *(list_t **)secondary_list->head->data, o1);
+    printf("%p\n", ilist_iterator->get_data(ilist_iterator->curr(l)));
 
-    list_delete(general_list);
-    list_delete(secondary_list);
+    list_delete(l);
+
+    free(o->color);
+    free(o);
+
     free(o1->color);
     free(o1);
 
     return 0;
 }
 
-int test_2()
+/*int test_2()
 {
     list_t *l = NULL;
     l = list_create(copy_obj_fn, dealloc_obj_fn, compar_fn, NULL);
 
     l == NULL ? assert("@l list wasn't created\n") : printf("address of the created tree: [%p]\n", l);
 
-    l->compare_fn == NULL ? assert("@compare_fn function in the tree is equal NULL") : 
+    l->compare_fn == NULL ? assert("@compare_fn function in the tree is equal NULL") :
                             printf("the address of the passed compare function and the compare function inside the list: [%p], [%p]\n", compar_fn, l->compare_fn);
 
-    l->dealloc_fn == NULL ? assert("@dealloc_fn function in the tree is equal NULL") : 
+    l->dealloc_fn == NULL ? assert("@dealloc_fn function in the tree is equal NULL") :
                             printf("the address of the passed deallocate function and the deallocate function inside the list: [%p], [%p]\n", dealloc_obj_fn, l->dealloc_fn);
 
-    l->copy_fn == NULL ? assert("@copy_fn function in the tree is equal NULL") : 
+    l->copy_fn == NULL ? assert("@copy_fn function in the tree is equal NULL") :
                             printf("the address of the passed copy pointer function and the copy pointer function inside the list: [%p], [%p]\n\n", copy_obj_fn, l->copy_fn);
 
     object *o1 = (object *)malloc(sizeof(object));
-    o1->color = (char *)malloc(3 * sizeof(char)); 
+    o1->color = (char *)malloc(3 * sizeof(char));
     o1->color[0] = 'r';
     o1->color[1] = 'e';
     o1->color[2] = 'd';
@@ -155,17 +183,17 @@ int test_3()
 
     l == NULL ? assert("@l list wasn't created\n") : printf("address of the created tree: [%p]\n", l);
 
-    l->compare_fn == NULL ? assert("@compare_fn function in the tree is equal NULL") : 
+    l->compare_fn == NULL ? assert("@compare_fn function in the tree is equal NULL") :
                             printf("the address of the passed compare function and the compare function inside the list: [%p], [%p]\n", compar_fn, l->compare_fn);
 
-    l->dealloc_fn == NULL ? assert("@dealloc_fn function in the tree is equal NULL") : 
+    l->dealloc_fn == NULL ? assert("@dealloc_fn function in the tree is equal NULL") :
                             printf("the address of the passed deallocate function and the deallocate function inside the list: [%p], [%p]\n", dealloc_obj_fn, l->dealloc_fn);
 
-    l->copy_fn == NULL ? assert("@copy_fn function in the tree is equal NULL") : 
+    l->copy_fn == NULL ? assert("@copy_fn function in the tree is equal NULL") :
                             printf("the address of the passed copy pointer function and the copy pointer function inside the list: [%p], [%p]\n\n", copy_obj_fn, l->copy_fn);
 
     object *o1 = (object *)malloc(sizeof(object));
-    o1->color = (char *)malloc(4 * sizeof(char)); 
+    o1->color = (char *)malloc(4 * sizeof(char));
     o1->color[0] = 'r';
     o1->color[1] = 'e';
     o1->color[2] = 'd';
@@ -178,7 +206,7 @@ int test_3()
     list_add_tail(l, o1);
 
     object *o2 = (object *)malloc(sizeof(object));
-    o2->color = (char *)malloc(7 * sizeof(char)); 
+    o2->color = (char *)malloc(7 * sizeof(char));
     o2->color[0] = 'y';
     o2->color[1] = 'e';
     o2->color[2] = 'l';
@@ -216,4 +244,4 @@ int test_3()
 
     return 0;
 
-}
+}*/
