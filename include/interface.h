@@ -1,18 +1,6 @@
 #ifndef __INTERFACE_H__
 #define __INTERFACE_H__
 
-<<<<<<< HEAD
-typedef struct _iallocator_t
-{
-    void* (*allocate)(void *self, int bytes);
-    void (*deallocate)(void *self, void *addr);
-    void* (*reallocate)(void *self, void *addr, int size_realloc);
-    void (*copy_data)(void *self, void *dest_data, void *src_data, int size_src);
-
-    /* pointer to an object that implements this interface */
-    void *self; 
-} iallocator_t;
-=======
 /* allocator interface definition*/
 typedef struct _iallocator_t
 {
@@ -46,6 +34,5 @@ typedef struct _itree_iterator_t
     void (*parent)(void *self);
     void *self;
 } itree_iterator_t;
->>>>>>> tree
 
 #endif /* __INTERFACE_H__ */
