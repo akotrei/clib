@@ -1,4 +1,5 @@
 CURRENT_DIR = $(shell pwd)
+DESTDIR?=/usr/local/lib
 
 # set optimization flag
 CXX_FLAG = O3
@@ -9,6 +10,11 @@ endif
 include 	= $(CURRENT_DIR)/include
 src			= $(CURRENT_DIR)/src
 lib			= $(CURRENT_DIR)/lib
+
+####################################
+# make install
+install:
+	cp -n $(lib)/* ${DESTDIR}
 
 ####################################
 # container
@@ -133,7 +139,7 @@ hash_table_obj: $(hash_table_c)
 	-I $(include)/list \
 	-I $(include)/array \
 	-c $(hash_table_c) \
-	-o $(hash_table_o) 
+	-o $(hash_table_o)
 
 hash_table_so: hash_table_obj
 	gcc -Wall -$(CXX_FLAG) -shared \
