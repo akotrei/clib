@@ -23,15 +23,16 @@ inline static void* copy_fake(void *o) { return o; }
  *
  * @a      - pointer to array
  *
- * @factor - memory increase indicator, that is, the number by which 
+ * @factor - memory increase indicator, that is, the number by which
  *           memory for the array will increase
  */
-static void 
-array_increase_capacity(array_t *a, 
+static void
+array_increase_capacity(array_t *a,
                         int factor);
 
-array_t* 
-array_create(int alloc_size,
+array_t*
+array_create(void *buffer,
+             int alloc_size,
              int elem_size,
              void* (*copy_fn)(void *o),
              void (*dealloc_fn)(void *o),
@@ -42,78 +43,53 @@ array_create(int alloc_size,
     assert(alloc_size > 0 && "@alloc_size must be > 0");
     assert(elem_size > 0 && "@elem_size must be > 0");
     assert(factor > 1 && "@factor must be > 1");
+    assert(buffer != NULL && "@buffer mustn't be NULL");
+    assert(iallocator != NULL && "@iallocator mustn't be NULL");
 
-    /*pointer to allocator interface*/
-    iallocator_t *_iallocator;
-
-    /*pointer to standard allocator*/
-    allocator_std_t *iallocator_std = NULL;
-
-    /*variable that will be needed for initialization @iallocator_owner*/
-    int _iallocator_owner;
-
-    /* if the pointer to the allocator interface passed to
-     * the function creating an array is NULL then a standard allocator is created
-     */
-    if(iallocator == NULL)
-    {
-        /*creating a standard allocator*/
-        iallocator_std = allocator_std_new();
-
-        /*getting interface allocator from standard allocator*/
-        _iallocator = allocator_std_get_allocator(iallocator_std);
-
-        /*now when the array is deleted, the allocator will be deleted*/
-        _iallocator_owner = 1;
-    }
-    /*if the pointer to the allocator interface passed
-     * to the function creating a list is not NULL
-     */
-    else
-    {
-        /*allocator interface assignment*/
-        _iallocator = iallocator;
-
-        /*deleting the allocator when deleting the array will not be done*/
-        _iallocator_owner = 0;
-    }
-    
     /* create array*/
-    array_t *a = (array_t *)_iallocator->allocate(_iallocator->self, 
-                                                  sizeof(array_t));
+    array_t *a = (array_t *)buffer;
 
     /* initialization field of array structure*/
     if(factor == 0)
         a->factor = 2;
     else
         a->factor = factor;
-    a->iallocator_owner = _iallocator_owner;
-    a->iallocator = _iallocator;
+
+    a->iallocator = iallocator;
     a->alloc_size = alloc_size;
     a->logic_size = 0;
     a->elem_size = elem_size;
 
     /* allocating memory for array data*/
-    a->data = (void *)a->iallocator->allocate(a->iallocator, 
+    a->data = (void *)a->iallocator->allocate(NULL,
                                               alloc_size * elem_size);
     /* initialization*/
     a->compare_fn = compare_fn;
 
     if(dealloc_fn != NULL)
         a->dealloc_fn = dealloc_fn;
-    else 
+    else
         a->dealloc_fn = dealloc_fake;
 
     if(copy_fn != NULL)
         a->copy_fn = copy_fn;
-    else 
+    else
         a->copy_fn = copy_fake;
 
     /* returning a pointer to created array*/
     return a;
 }
 
-void 
+/*
+ * @array_sizeof function returns size in the bytes structure of the array
+ */
+int
+array_sizeof()
+{
+    return sizeof(array_t);
+}
+
+void
 array_delete(array_t *a)
 {
     int elem_size = a->elem_size;
@@ -129,26 +105,15 @@ array_delete(array_t *a)
     }
 
     iallocator->deallocate(NULL, data);
-
-    /* deleting the allocator (if it was created when the array was created) 
-     * and the array*/
-    if (a->iallocator_owner == 1)
-    {
-        iallocator->deallocate(NULL, a);
-        allocator_std_delete(iallocator->self);
-    }
-    else
-    {
-        iallocator->deallocate(NULL, a);
-    }
+    iallocator->deallocate(NULL, a);
 }
 
-void 
-array_push_back(array_t *a, 
+void
+array_push_back(array_t *a,
                 void *obj)
 {
-    /* if the size of the memory allocated for the array is equal to the size 
-     * occupied by the memory objects, then we re-allocate the memory for 
+    /* if the size of the memory allocated for the array is equal to the size
+     * occupied by the memory objects, then we re-allocate the memory for
      * the @factor parameter*/
     if(a->alloc_size == a->logic_size)
     {
@@ -156,9 +121,9 @@ array_push_back(array_t *a,
     }
 
     /* copy object to array*/
-	a->iallocator->copy_data(NULL, 
-                             (char *)a->data + a->logic_size * a->elem_size, 
-                             a->copy_fn(obj), a->elem_size);   
+	a->iallocator->replicate(NULL,
+                             (char *)a->data + a->logic_size * a->elem_size,
+                             a->copy_fn(obj), a->elem_size);
     /* increasing the size of an array*/
 	a->logic_size++;
 }
@@ -187,13 +152,13 @@ array_insert(array_t *a,
     /* if the index is the end of the array*/
     if(index >= logic_size)
     {
-        a->iallocator->copy_data(NULL, 
-                                 (char *)a->data + logic_size * elem_size, 
+        a->iallocator->replicate(NULL,
+                                 (char *)a->data + logic_size * elem_size,
                                  a->copy_fn(obj), elem_size * count);
         a->logic_size += count;
     }
     /* otherwise we shift the data to the right to add objects*/
-    else 
+    else
     {
         /* copy the data byte by byte to the right side of the array*/
         char *begin_moving_data = (char *)a->data + index * elem_size;
@@ -203,8 +168,8 @@ array_insert(array_t *a,
         {
             *new_place_data-- = *end_moving_data--;
         }
-        a->iallocator->copy_data(NULL, 
-                                 begin_moving_data, a->copy_fn(obj), 
+        a->iallocator->replicate(NULL,
+                                 begin_moving_data, a->copy_fn(obj),
                                  elem_size * count);
         a->logic_size += count;
     }
@@ -226,7 +191,7 @@ array_get_index(array_t *a,
     int index = 0;
     char *tmp = (char *)a->data;
     int elem_size = a->elem_size;
-    while(a->compare_fn((const void *)tmp, (const void *)obj) != 0)    
+    while(a->compare_fn((const void *)tmp, (const void *)obj) != 0)
     {
         tmp = tmp + elem_size;
         index++;
@@ -249,7 +214,7 @@ array_rmv_element(array_t *a,
     {
         a->logic_size--;
     }
-    else 
+    else
     {
         char *tmp = (char *)a->data + index * a->elem_size;
         a->dealloc_fn(tmp);
@@ -263,22 +228,8 @@ array_rmv_element(array_t *a,
     }
 }
 
-void
-array_print(array_t *a,
-            void (*print_fn)(void *o))
-{
-    void *tmp = (char *)a->data;
-    int i = 0;
-    while(i < a->logic_size)
-    {
-        print_fn(tmp);
-        tmp += a->elem_size;
-        i++;
-    }
-}
-
-static void 
-array_increase_capacity(array_t *a, 
+static void
+array_increase_capacity(array_t *a,
                         int factor)
 {
     a->alloc_size *= factor;
