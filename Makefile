@@ -43,6 +43,7 @@ tree_so = $(lib)/libtree.so
 tree_obj: $(tree_c)
 	gcc -Wall -$(CXX_FLAG) -fPIC \
 	-I $(include) \
+	-I $(include)/tree \
 	-c $(tree_c) \
 	-o $(tree_o)
 
@@ -68,6 +69,25 @@ allocator_std_so: allocator_std_obj
 	gcc -Wall -$(CXX_FLAG) -shared \
 	-o $(allocator_std_so) $(allocator_std_o)
 	rm $(allocator_std_o)
+####################################
+
+####################################
+# tree_iterator
+tree_iterator_c 	= $(src)/tree_iterator.c
+tree_iterator_o 	= tree_iterator.o
+tree_iterator_so 	= $(lib)/libtree_iterator.so
+
+tree_iterator_obj: $(tree_iterator_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-I $(include)/tree \
+	-c $(tree_iterator_c) \
+	-o $(tree_iterator_o)
+
+tree_iterator_so: tree_iterator_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(tree_iterator_so) $(tree_iterator_o)
+	rm $(tree_iterator_o)
 ####################################
 
 ####################################
@@ -108,6 +128,7 @@ list_so: list_obj
 ####################################
 
 ####################################
+<<<<<<< HEAD
 # array
 array_c  = $(src)/array.c
 array_o  = array.o
@@ -145,6 +166,25 @@ hash_table_so: hash_table_obj
 	gcc -Wall -$(CXX_FLAG) -shared \
 	-o $(hash_table_so) $(hash_table_o)
 	rm $(hash_table_o)
+=======
+# test_tree
+test_tree_c = $(CURRENT_DIR)/test/test_tree.c
+test_tree_o = $(CURRENT_DIR)/test/test_tree.o
+test_tree_exe = $(CURRENT_DIR)/test/test_tree
+
+test_tree_obj: $(test_tree_c)
+	gcc -Wall -$(CXX_FLAG) \
+	-I $(include) \
+	-I $(include)/tree \
+	-c $(test_tree_c) \
+	-o $(test_tree_o)
+
+test_tree_exe: test_tree_obj
+	gcc -Wall -$(CXX_FLAG) \
+	-o $(test_tree_exe) $(test_tree_o) \
+	-L$(lib) -ltree -lallocator_std -lm -ltree_iterator
+	rm $(test_tree_o)
+>>>>>>> tree
 ####################################
 
 ####################################
