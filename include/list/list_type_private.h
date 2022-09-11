@@ -2,52 +2,52 @@
 #define __LIST_TYPE_PRIVATE_H__
 
 /*
- * list structure definiton
+ * List structure definiton
  */
 typedef struct _list_t
 {
-    /* number of nodes in the list*/
+    /* Number of nodes in the list*/
     int list_size;
 
-    /* pointer to an allocator interface that allocates and frees memory*/
+    /* Pointer to an allocator interface that allocates and frees memory*/
     iallocator_t *iallocator;
 
-    /* if user passes iallocator equals NULL than tree creates internal 
-     * allocator_std and is owner of this allocator and responsible 
-     * for deleting this allocator @iallocator_owner equals 1 when 
-     * tree is owner else 0*/
-    int iallocator_owner;
-
-    /* pointer to a function that copies the object*/
+    /* Pointer to a function that copies the object*/
     void* (*copy_fn)(void *obj);
 
-    /* pointer to a function that removes the object*/
+    /* Pointer to a function that removes the object*/
     void (*dealloc_fn)(void *obj);
 
-    /* pointer to a function that compares objects and returns 0 if they 
-     * are equal*/
+    /*
+     * Pointer to a function that compares objects and returns 0 if they
+     * are equal
+     */
     int (*compare_fn)(void *obj1, void *obj2);
 
-    /* pointer to the head of the list*/
+    /* Pointer to the head of the list*/
     node_t *head;
 
-    /* pointer to the tail of the list*/
+    /* Pointer to the current node of the list*/
+    node_t *curr;
+
+    /* Pointer to the tail of the list*/
     node_t *tail;
 } _list_t;
 
 /*
- * list node structure definition
+ * List node structure definition
  */
 typedef struct _node_t
 {
-    /* pointer to data in node*/
+    /* Pointer to data in node*/
     void *data;
 
-    /* pointer to next node*/
+    /* Pointer to next node*/
     node_t *next;
 
-    /* pointer to previous node*/
+    /* Pointer to previous node*/
     node_t *prev;
+
 } _node_t;
 
 #endif /* __LIST_TYPE_PRIVATE_H__ */

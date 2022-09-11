@@ -56,7 +56,7 @@ typedef struct _tree_t
     /* Pointer to the current root of the tree*/
     knot_t *curr;
 
-} _tree_t;
+} tree_t;
 
 /*
  * Definition @_knot_t type
@@ -75,6 +75,6 @@ typedef struct _knot_t
     /* Pointer to previous knot*/
     knot_t *parent;
 
-} _knot_t;
+} knot_t;
 
 #endif /* __TREE_TYPE_PRIVATE_H__ */

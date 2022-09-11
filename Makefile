@@ -128,7 +128,6 @@ list_so: list_obj
 ####################################
 
 ####################################
-<<<<<<< HEAD
 # array
 array_c  = $(src)/array.c
 array_o  = array.o
@@ -166,7 +165,7 @@ hash_table_so: hash_table_obj
 	gcc -Wall -$(CXX_FLAG) -shared \
 	-o $(hash_table_so) $(hash_table_o)
 	rm $(hash_table_o)
-=======
+####################################
 # test_tree
 test_tree_c = $(CURRENT_DIR)/test/test_tree.c
 test_tree_o = $(CURRENT_DIR)/test/test_tree.o
@@ -184,7 +183,24 @@ test_tree_exe: test_tree_obj
 	-o $(test_tree_exe) $(test_tree_o) \
 	-L$(lib) -ltree -lallocator_std -lm -ltree_iterator
 	rm $(test_tree_o)
->>>>>>> tree
+
+####################################
+# list_iterator
+list_iterator_c 	= $(src)/list_iterator.c
+list_iterator_o 	= list_iterator.o
+list_iterator_so 	= $(lib)/liblist_iterator.so
+
+list_iterator_obj: $(list_iterator_c)
+	gcc -Wall -$(CXX_FLAG) -fPIC \
+	-I $(include) \
+	-I $(include)/list \
+	-c $(list_iterator_c) \
+	-o $(list_iterator_o)
+
+list_iterator_so: list_iterator_obj
+	gcc -Wall -$(CXX_FLAG) -shared \
+	-o $(list_iterator_so) $(list_iterator_o)
+	rm $(list_iterator_o)
 ####################################
 
 ####################################
@@ -222,7 +238,7 @@ test_list_obj: $(test_list_c)
 test_list_exe: test_list_obj
 	gcc -Wall -$(CXX_FLAG) \
 	-o $(test_list_exe) $(test_list_o) \
-	-L$(lib) -llist -lallocator_std
+	-L$(lib) -llist -lallocator_std -llist_iterator
 	rm $(test_list_o)
 ####################################
 

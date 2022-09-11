@@ -147,44 +147,4 @@ tree_rmv_object(tree_t *t,
 void
 tree_balance_DSW(tree_t *t);
 
-/*
- * @tree_get_data function to receive data from the knot
- *
- * @knot    - pointer to the knot
- */
-void*
-tree_get_data(knot_t *knot);
-
-/*
- * @tree_get_root function returns the root of the tree
- *
- * @t    - pointer to the tree
- */
-knot_t*
-tree_get_root(tree_t *t);
-
-/*
- * @tree_reset function that resets the current knot to the root knot
- */
-void
-tree_reset();
-
-/*
- *
- */
-knot_t*
-tree_to_left(tree_t *t);
-
-/*
- *
- */
-knot_t*
-tree_to_right(tree_t *t);
-
-/*
- *
- */
-knot_t*
-tree_to_parent(tree_t *t);
-
 #endif /* __TREE_H__ */
