@@ -36,13 +36,20 @@
  *
  */
 array_t*
-array_create(int alloc_size,
+array_create(void *buffer,
+             int alloc_size,
              int elem_size,
              void* (*copy_fn)(void *o),
              void (*dealloc_fn)(void *o),
              int (*compare_fn)(const void *o1, const void *o2),
              int factor,
              iallocator_t *iallocator);
+
+/*
+ * @array_sizeof function returns size in the bytes structure of the array
+ */
+int
+array_sizeof();
 
 /* @array_delete array delete function
  *
@@ -77,7 +84,7 @@ array_insert(array_t *a,
              int index,
              int count);
 
-/* @array_fnd_element function to search for an element by index and returns 
+/* @array_fnd_element function to search for an element by index and returns
  * a pointer to the found element
  *
  * @a     - pointer to array
@@ -102,7 +109,7 @@ int
 array_get_index(array_t *a,
                 void *obj);
 
-/* @array_rmv_element function to remove an element from an array by index 
+/* @array_rmv_element function to remove an element from an array by index
  *
  * @a     - pointer to array
  *
@@ -122,7 +129,7 @@ array_rmv_element(array_t *a,
  *
  * @index - index of element in array
  */
-void 
+void
 array_factor(array_t *a,
              int factor);
 
@@ -130,19 +137,7 @@ array_factor(array_t *a,
  *
  * @a - pointer to array
  */
-int 
+int
 array_size(array_t *a);
-
-/* @array_print function to print an array to the console
- *
- * @a     - pointer to array
- *
- * @obj   - pointer to object
- *
- * @index - index of element in array
- */
-void
-array_print(array_t *a,
-            void (*print_fn)(void *o));
 
 #endif /* __ARRAY_H__ */

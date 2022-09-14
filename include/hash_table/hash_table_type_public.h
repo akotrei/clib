@@ -2,12 +2,7 @@
 #define __HASH_TABLE_TYPE_PUBLIC_H__
 
 /*
- * pair key-value type declaration
- */
-typedef struct _pair_t pair_t;
-
-/*
- * hash table type declaration
+ * Hash table type declaration
  */
 typedef struct _hash_table_t hash_table_t;
 

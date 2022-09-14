@@ -1,12 +1,13 @@
 #include "hash_table.h"
 #include "hash_table_type_private.h"
+#include "allocator_std.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#define HASH_TABLE_SIZE 100000
+#define HASH_TABLE_SIZE 10
 
 typedef struct object
 {
@@ -14,7 +15,7 @@ typedef struct object
     int y;
 } object;
 
-typedef struct pair 
+typedef struct pair
 {
     char *key;
     char *value;
@@ -36,8 +37,8 @@ char *rand_string(size_t size)
 }
 
 void test_hash_table_1();
-uint64_t test_hash_table_hash_function(const void *o) 
-{ 
+uint64_t test_hash_table_hash_function(void *o)
+{
     const char *s = (const char *)o;
     const int p = 31, m = 1e9 + 7;
     int hash = 0;
@@ -48,7 +49,7 @@ uint64_t test_hash_table_hash_function(const void *o)
     }
     return hash;
 //    int *key = (int *)o;
-//    return *key; 
+//    return *key;
 }
 
 void test_hash_table_print(void *o)
@@ -80,7 +81,19 @@ int main(int argc, char **args)
 
 void test_hash_table_1()
 {
-    hash_table_t *ht = hash_table_create(HASH_TABLE_SIZE, 
+    char mem[sizeof(iallocator_t)];
+    iallocator_t *iallocator = allocator_std_new(mem);
+    printf("%d\n", hash_table_sizeof());
+    hash_table_t *ht = hash_table_create(iallocator->allocate(NULL, hash_table_sizeof()),
+                                         HASH_TABLE_SIZE,
+                                         test_hash_table_hash_function,
+                                         cmp,
+                                         NULL, NULL, NULL, NULL,
+                                         2, iallocator);
+
+    hash_table_delete(ht);
+
+/*    hash_table_t *ht = hash_table_create(HASH_TABLE_SIZE,
                                          test_hash_table_hash_function,
                                          cmp,
                                          NULL,
@@ -109,15 +122,15 @@ void test_hash_table_1()
         hash_table_insert(ht, p[i].key, p[i].value);
     }
 
-  //  hash_table_print(ht, test_hash_table_print); 
+    hash_table_print(ht, test_hash_table_print);
     pair *f = (pair *)hash_table_search(ht, p[5].key);
     pair *c = (pair *)hash_table_remove(ht, p[5].key);
 
-//    hash_table_rehashing(ht);
+    hash_table_rehashing(ht);
 
-//    hash_table_print(ht, test_hash_table_print); 
+    hash_table_print(ht, test_hash_table_print);
     printf("%s, %s\n", c->key, c->value);
     printf("%s, %s\n", f->key, f->value);
-//    printf("%d\n", j);  
-    hash_table_delete(ht);
+    printf("%d\n", j);
+    hash_table_delete(ht);*/
 }
